@@ -1,0 +1,47 @@
+{
+ "cloud": {},
+ "resources": {
+  "s18r2b06-ib0": {
+   "implementations": {
+    "wordcount.merge_two_dicts": {
+     "maxTime": 54,
+     "executions": 4,
+     "avgTime": 49,
+     "minTime": 48
+    },
+    "wordcount.wordCount": {
+     "maxTime": 59,
+     "executions": 4,
+     "avgTime": 56,
+     "minTime": 55
+    },
+    "wordcount.read_file": {
+     "maxTime": 199,
+     "executions": 4,
+     "avgTime": 192,
+     "minTime": 188
+    }
+   }
+  }
+ },
+ "implementations": {
+  "wordcount.read_file": {
+   "maxTime": 199,
+   "executions": 4,
+   "avgTime": 192,
+   "minTime": 188
+  },
+  "wordcount.merge_two_dicts": {
+   "maxTime": 54,
+   "executions": 4,
+   "avgTime": 49,
+   "minTime": 48
+  },
+  "wordcount.wordCount": {
+   "maxTime": 59,
+   "executions": 4,
+   "avgTime": 56,
+   "minTime": 55
+  }
+ }
+}
