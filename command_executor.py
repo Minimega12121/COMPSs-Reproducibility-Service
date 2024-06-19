@@ -15,6 +15,9 @@ def executor(command: list[str]):
         print("Standard Error:")
         print(stderr)
         print("Command failed with return code:", process.returncode)
+        
+        
+
 
 
 

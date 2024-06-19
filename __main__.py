@@ -6,6 +6,7 @@ import logging
 
 from repro_methods import generate_command_line
 from command_executor import executor
+from result_mover import move_results_created, dataset_mover_and_application_mover
 
 class ReproducibilityService:
     def __init__(self, root_folder):
@@ -26,11 +27,18 @@ class ReproducibilityService:
 
  
     def run(self):
+       initial_files = set(os.listdir(os.getcwd()))
        new_command = generate_command_line(self)
+       print("Running the command: ", new_command)
        # run the new command
+       temp = dataset_mover_and_application_mover(self.crate_directory)
        executor(new_command)
+       move_results_created(initial_files,temp)
+
+      
          
 
 if __name__ == "__main__":
     rs = ReproducibilityService(os.getcwd())
     rs.run()
+   

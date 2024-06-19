@@ -1,0 +1,377 @@
+{
+ "cloud": {},
+ "resources": {
+  "nvb18": {
+   "implementations": {
+    "dislib.cluster.kmeans.base._partial_sum_gpu": {
+     "maxTime": 253059,
+     "executions": 10,
+     "avgTime": 222852,
+     "minTime": 190317
+    },
+    "dislib.data.array._random_block_gpu": {
+     "maxTime": 58346,
+     "executions": 2,
+     "avgTime": 55868,
+     "minTime": 53390
+    },
+    "dislib.cluster.kmeans.base._merge": {
+     "maxTime": 190,
+     "executions": 1,
+     "avgTime": 190,
+     "minTime": 190
+    }
+   }
+  },
+  "nvb17": {
+   "implementations": {
+    "dislib.cluster.kmeans.base._partial_sum_gpu": {
+     "maxTime": 237985,
+     "executions": 10,
+     "avgTime": 193009,
+     "minTime": 105165
+    },
+    "dislib.data.array._random_block_gpu": {
+     "maxTime": 61655,
+     "executions": 2,
+     "avgTime": 59804,
+     "minTime": 57954
+    },
+    "dislib.cluster.kmeans.base._merge": {
+     "maxTime": -9223372036854775808,
+     "executions": 0,
+     "avgTime": 100,
+     "minTime": 9223372036854775807
+    }
+   }
+  },
+  "nvb19": {
+   "implementations": {
+    "dislib.cluster.kmeans.base._partial_sum_gpu": {
+     "maxTime": 239060,
+     "executions": 10,
+     "avgTime": 182393,
+     "minTime": 123490
+    },
+    "dislib.data.array._random_block_gpu": {
+     "maxTime": 56349,
+     "executions": 2,
+     "avgTime": 54323,
+     "minTime": 52298
+    },
+    "dislib.cluster.kmeans.base._merge": {
+     "maxTime": -9223372036854775808,
+     "executions": 0,
+     "avgTime": 100,
+     "minTime": 9223372036854775807
+    }
+   }
+  },
+  "nvb5": {
+   "implementations": {
+    "dislib.cluster.kmeans.base._partial_sum_gpu": {
+     "maxTime": 253164,
+     "executions": 10,
+     "avgTime": 202583,
+     "minTime": 99157
+    },
+    "dislib.data.array._random_block_gpu": {
+     "maxTime": 64672,
+     "executions": 2,
+     "avgTime": 61211,
+     "minTime": 57750
+    },
+    "dislib.cluster.kmeans.base._merge": {
+     "maxTime": 163,
+     "executions": 1,
+     "avgTime": 163,
+     "minTime": 163
+    }
+   }
+  },
+  "nvb4": {
+   "implementations": {
+    "dislib.cluster.kmeans.base._partial_sum_gpu": {
+     "maxTime": 246294,
+     "executions": 10,
+     "avgTime": 204849,
+     "minTime": 138676
+    },
+    "dislib.data.array._random_block_gpu": {
+     "maxTime": 57897,
+     "executions": 2,
+     "avgTime": 55091,
+     "minTime": 52285
+    },
+    "dislib.cluster.kmeans.base._merge": {
+     "maxTime": 147,
+     "executions": 1,
+     "avgTime": 147,
+     "minTime": 147
+    }
+   }
+  },
+  "nvb9": {
+   "implementations": {
+    "dislib.cluster.kmeans.base._partial_sum_gpu": {
+     "maxTime": 221234,
+     "executions": 10,
+     "avgTime": 174657,
+     "minTime": 101307
+    },
+    "dislib.data.array._random_block_gpu": {
+     "maxTime": 50682,
+     "executions": 2,
+     "avgTime": 48259,
+     "minTime": 45836
+    },
+    "dislib.cluster.kmeans.base._merge": {
+     "maxTime": -9223372036854775808,
+     "executions": 0,
+     "avgTime": 100,
+     "minTime": 9223372036854775807
+    }
+   }
+  },
+  "nvb8": {
+   "implementations": {
+    "dislib.cluster.kmeans.base._partial_sum_gpu": {
+     "maxTime": 246265,
+     "executions": 10,
+     "avgTime": 205339,
+     "minTime": 139455
+    },
+    "dislib.data.array._random_block_gpu": {
+     "maxTime": 47863,
+     "executions": 2,
+     "avgTime": 47732,
+     "minTime": 47601
+    },
+    "dislib.cluster.kmeans.base._merge": {
+     "maxTime": -9223372036854775808,
+     "executions": 0,
+     "avgTime": 100,
+     "minTime": 9223372036854775807
+    }
+   }
+  },
+  "nvb7": {
+   "implementations": {
+    "dislib.cluster.kmeans.base._partial_sum_gpu": {
+     "maxTime": 225894,
+     "executions": 10,
+     "avgTime": 161696,
+     "minTime": 91389
+    },
+    "dislib.data.array._random_block_gpu": {
+     "maxTime": 55275,
+     "executions": 2,
+     "avgTime": 52773,
+     "minTime": 50272
+    },
+    "dislib.cluster.kmeans.base._merge": {
+     "maxTime": 434,
+     "executions": 1,
+     "avgTime": 434,
+     "minTime": 434
+    }
+   }
+  },
+  "nvb6": {
+   "implementations": {
+    "dislib.cluster.kmeans.base._partial_sum_gpu": {
+     "maxTime": 235883,
+     "executions": 10,
+     "avgTime": 178042,
+     "minTime": 91071
+    },
+    "dislib.data.array._random_block_gpu": {
+     "maxTime": 58775,
+     "executions": 2,
+     "avgTime": 56291,
+     "minTime": 53808
+    },
+    "dislib.cluster.kmeans.base._merge": {
+     "maxTime": -9223372036854775808,
+     "executions": 0,
+     "avgTime": 100,
+     "minTime": 9223372036854775807
+    }
+   }
+  },
+  "nvb14": {
+   "implementations": {
+    "dislib.cluster.kmeans.base._partial_sum_gpu": {
+     "maxTime": 244687,
+     "executions": 10,
+     "avgTime": 194964,
+     "minTime": 137135
+    },
+    "dislib.data.array._random_block_gpu": {
+     "maxTime": 57113,
+     "executions": 2,
+     "avgTime": 50952,
+     "minTime": 44791
+    },
+    "dislib.cluster.kmeans.base._merge": {
+     "maxTime": 164,
+     "executions": 1,
+     "avgTime": 164,
+     "minTime": 164
+    }
+   }
+  },
+  "nvb13": {
+   "implementations": {
+    "dislib.cluster.kmeans.base._partial_sum_gpu": {
+     "maxTime": 251415,
+     "executions": 10,
+     "avgTime": 205197,
+     "minTime": 145005
+    },
+    "dislib.data.array._random_block_gpu": {
+     "maxTime": 53328,
+     "executions": 2,
+     "avgTime": 48231,
+     "minTime": 43135
+    },
+    "dislib.cluster.kmeans.base._merge": {
+     "maxTime": -9223372036854775808,
+     "executions": 0,
+     "avgTime": 100,
+     "minTime": 9223372036854775807
+    }
+   }
+  },
+  "nvb16": {
+   "implementations": {
+    "dislib.cluster.kmeans.base._partial_sum_gpu": {
+     "maxTime": 235647,
+     "executions": 10,
+     "avgTime": 199024,
+     "minTime": 146409
+    },
+    "dislib.data.array._random_block_gpu": {
+     "maxTime": 50270,
+     "executions": 2,
+     "avgTime": 50270,
+     "minTime": 50270
+    },
+    "dislib.cluster.kmeans.base._merge": {
+     "maxTime": -9223372036854775808,
+     "executions": 0,
+     "avgTime": 100,
+     "minTime": 9223372036854775807
+    }
+   }
+  },
+  "nvb15": {
+   "implementations": {
+    "dislib.cluster.kmeans.base._partial_sum_gpu": {
+     "maxTime": 230150,
+     "executions": 10,
+     "avgTime": 197482,
+     "minTime": 155171
+    },
+    "dislib.data.array._random_block_gpu": {
+     "maxTime": 57781,
+     "executions": 2,
+     "avgTime": 56176,
+     "minTime": 54571
+    },
+    "dislib.cluster.kmeans.base._merge": {
+     "maxTime": -9223372036854775808,
+     "executions": 0,
+     "avgTime": 100,
+     "minTime": 9223372036854775807
+    }
+   }
+  },
+  "nvb21": {
+   "implementations": {
+    "dislib.cluster.kmeans.base._partial_sum_gpu": {
+     "maxTime": 242119,
+     "executions": 10,
+     "avgTime": 195064,
+     "minTime": 73040
+    },
+    "dislib.data.array._random_block_gpu": {
+     "maxTime": 59794,
+     "executions": 2,
+     "avgTime": 59502,
+     "minTime": 59211
+    },
+    "dislib.cluster.kmeans.base._merge": {
+     "maxTime": -9223372036854775808,
+     "executions": 0,
+     "avgTime": 100,
+     "minTime": 9223372036854775807
+    }
+   }
+  },
+  "nvb20": {
+   "implementations": {
+    "dislib.cluster.kmeans.base._partial_sum_gpu": {
+     "maxTime": 253612,
+     "executions": 10,
+     "avgTime": 207091,
+     "minTime": 130884
+    },
+    "dislib.data.array._random_block_gpu": {
+     "maxTime": 50209,
+     "executions": 2,
+     "avgTime": 49305,
+     "minTime": 48402
+    },
+    "dislib.cluster.kmeans.base._merge": {
+     "maxTime": -9223372036854775808,
+     "executions": 0,
+     "avgTime": 100,
+     "minTime": 9223372036854775807
+    }
+   }
+  },
+  "nvb12": {
+   "implementations": {
+    "dislib.cluster.kmeans.base._partial_sum_gpu": {
+     "maxTime": 224251,
+     "executions": 10,
+     "avgTime": 191404,
+     "minTime": 152912
+    },
+    "dislib.data.array._random_block_gpu": {
+     "maxTime": 54649,
+     "executions": 2,
+     "avgTime": 52961,
+     "minTime": 51273
+    },
+    "dislib.cluster.kmeans.base._merge": {
+     "maxTime": -9223372036854775808,
+     "executions": 0,
+     "avgTime": 100,
+     "minTime": 9223372036854775807
+    }
+   }
+  }
+ },
+ "implementations": {
+  "dislib.cluster.kmeans.base._partial_sum_gpu": {
+   "maxTime": 253612,
+   "executions": 160,
+   "avgTime": 194724,
+   "minTime": 73040
+  },
+  "dislib.data.array._random_block_gpu": {
+   "maxTime": 64672,
+   "executions": 32,
+   "avgTime": 53668,
+   "minTime": 43135
+  },
+  "dislib.cluster.kmeans.base._merge": {
+   "maxTime": 434,
+   "executions": 5,
+   "avgTime": 219,
+   "minTime": 147
+  }
+ }
+}

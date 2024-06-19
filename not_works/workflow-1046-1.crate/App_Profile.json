@@ -1,0 +1,23 @@
+{
+ "cloud": {},
+ "resources": {
+  "localhost": {
+   "implementations": {
+    "matmul_tasks.multiply": {
+     "maxTime": 520,
+     "executions": 8,
+     "avgTime": 112,
+     "minTime": 51
+    }
+   }
+  }
+ },
+ "implementations": {
+  "matmul_tasks.multiply": {
+   "maxTime": 520,
+   "executions": 8,
+   "avgTime": 112,
+   "minTime": 51
+  }
+ }
+}
