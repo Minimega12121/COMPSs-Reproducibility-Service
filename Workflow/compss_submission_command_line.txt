@@ -1,1 +1,0 @@
-enqueue_compss --provenance --num_nodes=1 --qos=debug --job_name=wordcount_files --lang=python --log_level=debug --summary --exec_time=5 /home/bsc19/bsc19057/COMPSs-DP/tutorial_apps/python/wordcount/src/wordcount.py /home/bsc19/bsc19057/COMPSs-DP/tutorial_apps/python/wordcount/data/

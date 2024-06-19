@@ -1,0 +1,14 @@
+COMPSs Workflow Information:
+  name: Wordcount-merge example on COMPSs
+  description: Wordcount is an application that counts the number of words for a given set of files.To allow parallelism every file is treated separately and merged afterwards.
+  license: Apache-2.0
+  sources: src/wordcount_merge.py
+  data_persistence: True
+  inputs: /data
+
+Authors:
+  - name: Archit Dabral
+    e-mail: architdabral1234567890@gmail.com
+    orcid: https://orcid.org/0009-0009-6701-3547
+
+
