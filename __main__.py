@@ -8,6 +8,10 @@ from repro_methods import generate_command_line
 from command_executor import executor
 from result_mover import move_results_created, dataset_mover_and_application_mover
 
+# Rules:
+# (1) If path to folder is given, then the path should end with '/'
+# (2) It does not works if there is any path given inside the program as it can't map the path
+
 class ReproducibilityService:
     def __init__(self, root_folder):
         self.root_folder = root_folder

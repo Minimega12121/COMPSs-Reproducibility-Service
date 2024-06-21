@@ -1,0 +1,721 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <title>PyCOMPSs Matrix Multiplication, out-of-core using files, reproducibility example</title>
+  <script type="application/ld+json">{
+  "@context": [
+    "https://w3id.org/ro/crate/1.1/context",
+    "https://w3id.org/ro/terms/workflow-run"
+  ],
+  "@graph": [
+    {
+      "@id": "ro-crate-metadata.json",
+      "@type": "CreativeWork",
+      "about": {
+        "@id": "./"
+      },
+      "conformsTo": [
+        {
+          "@id": "https://w3id.org/ro/crate/1.1"
+        },
+        {
+          "@id": "https://w3id.org/workflowhub/workflow-ro-crate/1.0"
+        }
+      ]
+    },
+    {
+      "@id": "ro-crate-preview.html",
+      "@type": "CreativeWork",
+      "about": {
+        "@id": "./"
+      }
+    },
+    {
+      "@id": "./",
+      "@type": "Dataset",
+      "conformsTo": [
+        {
+          "@id": "https://w3id.org/ro/wfrun/process/0.4"
+        },
+        {
+          "@id": "https://w3id.org/ro/wfrun/workflow/0.4"
+        },
+        {
+          "@id": "https://w3id.org/workflowhub/workflow-ro-crate/1.0"
+        }
+      ],
+      "creator": [
+        {
+          "@id": "https://orcid.org/0000-0003-0606-2512"
+        }
+      ],
+      "datePublished": "2024-04-30T10:49:33+00:00",
+      "description": "**Name:** Matrix multiplication with Files, reproducibility example  \n**Contact Person**: support-compss@bsc.es  \n**Access Level**: public  \n**License Agreement**: Apache2  \n**Platform**: COMPSs  \n\n# Description\nMatrix multiplication is a binary operation that takes a pair of matrices and produces another matrix.\n\nIf A is an n×m matrix and B is an m×p matrix, the result AB of their multiplication is an n×p matrix defined only if the number of columns m in A is equal to the number of rows m in B. When multiplying A and B, the elements of the rows in A are multiplied with corresponding columns in B.\n\nIn this implementation, A and B are square matrices (same number of rows and columns), and so it is the result matrix C. Each matrix is divided in N blocks of M doubles (N hardcoded to 2, and M hardcoded to 8). The multiplication of two blocks is done by a multiply task method with a simple three-nested-loop implementation. When executed with COMPSs, the main program generates N^3^ tasks arranged as N^2^ chains of N tasks in the dependency graph.\n\n# Reproducibility\nTo reproduce the exact results of this example, follow the instructions at the [Workflow Provenance section at COMPSs User Manual](https://compss-doc.readthedocs.io/en/stable/Sections/05_Tools/04_Workflow_Provenance.html)\n\n# Execution instructions\nUsage:\n```\nruncompss --lang=python src/matmul_files.py inputs_folder/ outputs_folder/\n```\n\nwhere:\n* inputs_folder/: Folder where A and B matrices are located\n* outputs_folder/: Folder with the resulting C matrix\n\n\n# Execution Examples\n```\nruncompss --lang=python src/matmul_files.py inputs/ outputs/\nruncompss src/matmul_files.py inputs/ outputs/\npython -m pycompss src/matmul_files.py inputs/ outputs/\n```\n\n# Build\nNo build is required\n",
+      "hasPart": [
+        {
+          "@id": "application_sources/src/matmul_files.py"
+        },
+        {
+          "@id": "complete_graph.svg"
+        },
+        {
+          "@id": "application_sources/src/matmul_tasks.py"
+        },
+        {
+          "@id": "App_Profile.json"
+        },
+        {
+          "@id": "compss_submission_command_line.txt"
+        },
+        {
+          "@id": "matmul_reproducibility.yaml"
+        },
+        {
+          "@id": "dataset/inputs/A.0.0"
+        },
+        {
+          "@id": "dataset/inputs/A.0.1"
+        },
+        {
+          "@id": "dataset/inputs/A.1.0"
+        },
+        {
+          "@id": "dataset/inputs/A.1.1"
+        },
+        {
+          "@id": "dataset/inputs/B.0.0"
+        },
+        {
+          "@id": "dataset/inputs/B.0.1"
+        },
+        {
+          "@id": "dataset/inputs/B.1.0"
+        },
+        {
+          "@id": "dataset/inputs/B.1.1"
+        },
+        {
+          "@id": "dataset/outputs/C.0.0"
+        },
+        {
+          "@id": "dataset/outputs/C.0.1"
+        },
+        {
+          "@id": "dataset/outputs/C.1.0"
+        },
+        {
+          "@id": "dataset/outputs/C.1.1"
+        }
+      ],
+      "license": "Apache-2.0",
+      "mainEntity": {
+        "@id": "application_sources/src/matmul_files.py"
+      },
+      "mentions": {
+        "@id": "#COMPSs_Workflow_Run_Crate_MacBook-Pro-Raul-2018.local_36be8c72-82c3-4806-8a2d-0115f2f5a2e6"
+      },
+      "name": "PyCOMPSs Matrix Multiplication, out-of-core using files, reproducibility example",
+      "publisher": [
+        {
+          "@id": "https://ror.org/05sd8tv96"
+        }
+      ]
+    },
+    {
+      "@id": "application_sources/src/matmul_files.py",
+      "@type": [
+        "File",
+        "SoftwareSourceCode",
+        "ComputationalWorkflow"
+      ],
+      "contentSize": 1959,
+      "description": "Main file of the COMPSs workflow source files",
+      "encodingFormat": "text/plain",
+      "image": {
+        "@id": "complete_graph.svg"
+      },
+      "name": "matmul_files.py",
+      "programmingLanguage": {
+        "@id": "#compss"
+      }
+    },
+    {
+      "@id": "complete_graph.svg",
+      "@type": [
+        "File",
+        "ImageObject",
+        "WorkflowSketch"
+      ],
+      "about": {
+        "@id": "application_sources/src/matmul_files.py"
+      },
+      "contentSize": 6311,
+      "description": "The graph diagram of the workflow, automatically generated by COMPSs runtime",
+      "encodingFormat": [
+        [
+          "image/svg+xml",
+          {
+            "@id": "https://www.nationalarchives.gov.uk/PRONOM/fmt/92"
+          }
+        ]
+      ],
+      "name": "complete_graph.svg",
+      "sha256": "06fa05a92890e57219b3622b5f6eb64accd9f609679e1929f60a954b8c22e287"
+    },
+    {
+      "@id": "application_sources/src/matmul_tasks.py",
+      "@type": [
+        "File",
+        "SoftwareSourceCode"
+      ],
+      "contentSize": 1627,
+      "description": "Auxiliary File",
+      "encodingFormat": "text/plain",
+      "name": "matmul_tasks.py"
+    },
+    {
+      "@id": "App_Profile.json",
+      "@type": "File",
+      "contentSize": 244,
+      "description": "COMPSs application Tasks profile",
+      "encodingFormat": [
+        "application/json",
+        {
+          "@id": "https://www.nationalarchives.gov.uk/PRONOM/fmt/817"
+        }
+      ],
+      "name": "App_Profile.json",
+      "sha256": "1377a3310d64ced100aaec2ebad8e759f3e9e1af27f2e1048e0e662c6ccdec82"
+    },
+    {
+      "@id": "compss_submission_command_line.txt",
+      "@type": "File",
+      "contentSize": 170,
+      "description": "COMPSs submission command line (runcompss / enqueue_compss), including flags and parameters passed to the application",
+      "encodingFormat": "text/plain",
+      "name": "compss_submission_command_line.txt",
+      "sha256": "138c40d441819ac40ed040e60b86e0cfab08f006bade63d81e38cc291ec19972"
+    },
+    {
+      "@id": "matmul_reproducibility.yaml",
+      "@type": "File",
+      "contentSize": 2279,
+      "description": "COMPSs Workflow Provenance YAML configuration file",
+      "encodingFormat": [
+        "YAML",
+        {
+          "@id": "https://www.nationalarchives.gov.uk/PRONOM/fmt/818"
+        }
+      ],
+      "name": "matmul_reproducibility.yaml",
+      "sha256": "72761fbdac766bcf257587aaf3809d8e73a580e5c2200e14f2789ec28e264b17"
+    },
+    {
+      "@id": "dataset/inputs/A.0.0",
+      "@type": "File",
+      "contentSize": 256,
+      "dateModified": "2024-04-30T10:11:40+00:00",
+      "name": "A.0.0",
+      "sdDatePublished": "2024-04-30T10:49:33+00:00"
+    },
+    {
+      "@id": "dataset/inputs/A.0.1",
+      "@type": "File",
+      "contentSize": 256,
+      "dateModified": "2024-04-30T10:11:40+00:00",
+      "name": "A.0.1",
+      "sdDatePublished": "2024-04-30T10:49:33+00:00"
+    },
+    {
+      "@id": "dataset/inputs/A.1.0",
+      "@type": "File",
+      "contentSize": 256,
+      "dateModified": "2024-04-30T10:11:40+00:00",
+      "name": "A.1.0",
+      "sdDatePublished": "2024-04-30T10:49:33+00:00"
+    },
+    {
+      "@id": "dataset/inputs/A.1.1",
+      "@type": "File",
+      "contentSize": 256,
+      "dateModified": "2024-04-30T10:11:40+00:00",
+      "name": "A.1.1",
+      "sdDatePublished": "2024-04-30T10:49:33+00:00"
+    },
+    {
+      "@id": "dataset/inputs/B.0.0",
+      "@type": "File",
+      "contentSize": 256,
+      "dateModified": "2024-04-30T10:11:40+00:00",
+      "name": "B.0.0",
+      "sdDatePublished": "2024-04-30T10:49:33+00:00"
+    },
+    {
+      "@id": "dataset/inputs/B.0.1",
+      "@type": "File",
+      "contentSize": 256,
+      "dateModified": "2024-04-30T10:11:40+00:00",
+      "name": "B.0.1",
+      "sdDatePublished": "2024-04-30T10:49:33+00:00"
+    },
+    {
+      "@id": "dataset/inputs/B.1.0",
+      "@type": "File",
+      "contentSize": 256,
+      "dateModified": "2024-04-30T10:11:40+00:00",
+      "name": "B.1.0",
+      "sdDatePublished": "2024-04-30T10:49:33+00:00"
+    },
+    {
+      "@id": "dataset/inputs/B.1.1",
+      "@type": "File",
+      "contentSize": 256,
+      "dateModified": "2024-04-30T10:11:40+00:00",
+      "name": "B.1.1",
+      "sdDatePublished": "2024-04-30T10:49:33+00:00"
+    },
+    {
+      "@id": "dataset/outputs/C.0.0",
+      "@type": "File",
+      "contentSize": 320,
+      "dateModified": "2024-04-30T10:49:29+00:00",
+      "name": "C.0.0",
+      "sdDatePublished": "2024-04-30T10:49:33+00:00"
+    },
+    {
+      "@id": "dataset/outputs/C.0.1",
+      "@type": "File",
+      "contentSize": 320,
+      "dateModified": "2024-04-30T10:49:29+00:00",
+      "name": "C.0.1",
+      "sdDatePublished": "2024-04-30T10:49:33+00:00"
+    },
+    {
+      "@id": "dataset/outputs/C.1.0",
+      "@type": "File",
+      "contentSize": 320,
+      "dateModified": "2024-04-30T10:49:29+00:00",
+      "name": "C.1.0",
+      "sdDatePublished": "2024-04-30T10:49:33+00:00"
+    },
+    {
+      "@id": "dataset/outputs/C.1.1",
+      "@type": "File",
+      "contentSize": 320,
+      "dateModified": "2024-04-30T10:49:29+00:00",
+      "name": "C.1.1",
+      "sdDatePublished": "2024-04-30T10:49:33+00:00"
+    },
+    {
+      "@id": "https://about.workflowhub.eu/Workflow-RO-Crate/",
+      "@type": "CreativeWork",
+      "name": "Workflow RO-Crate Profile",
+      "version": "0.2.0"
+    },
+    {
+      "@id": "mailto:Raul.Sirvent@bsc.es",
+      "@type": "ContactPoint",
+      "contactType": "Author",
+      "email": "Raul.Sirvent@bsc.es",
+      "identifier": "Raul.Sirvent@bsc.es",
+      "url": "https://orcid.org/0000-0003-0606-2512"
+    },
+    {
+      "@id": "https://ror.org/05sd8tv96",
+      "@type": "Organization",
+      "name": "Barcelona Supercomputing Center"
+    },
+    {
+      "@id": "https://orcid.org/0000-0003-0606-2512",
+      "@type": "Person",
+      "affiliation": {
+        "@id": "https://ror.org/05sd8tv96"
+      },
+      "contactPoint": {
+        "@id": "mailto:Raul.Sirvent@bsc.es"
+      },
+      "name": "Raül Sirvent"
+    },
+    {
+      "@id": "#compss",
+      "@type": "ComputerLanguage",
+      "alternateName": "COMPSs",
+      "citation": "https://doi.org/10.1007/s10723-013-9272-5",
+      "name": "COMPSs Programming Model",
+      "url": "http://compss.bsc.es/",
+      "version": "3.3.rc2402"
+    },
+    {
+      "@id": "https://www.nationalarchives.gov.uk/PRONOM/fmt/92",
+      "@type": "WebSite",
+      "name": "Scalable Vector Graphics"
+    },
+    {
+      "@id": "https://www.nationalarchives.gov.uk/PRONOM/fmt/817",
+      "@type": "WebSite",
+      "name": "JSON Data Interchange Format"
+    },
+    {
+      "@id": "https://www.nationalarchives.gov.uk/PRONOM/fmt/818",
+      "@type": "WebSite",
+      "name": "YAML"
+    },
+    {
+      "@id": "#compss_home",
+      "@type": "PropertyValue",
+      "name": "COMPSS_HOME",
+      "value": "/Users/rsirvent/opt/COMPSs/"
+    },
+    {
+      "@id": "#COMPSs_Workflow_Run_Crate_MacBook-Pro-Raul-2018.local_36be8c72-82c3-4806-8a2d-0115f2f5a2e6",
+      "@type": "CreateAction",
+      "actionStatus": {
+        "@id": "http://schema.org/CompletedActionStatus"
+      },
+      "agent": {
+        "@id": "https://orcid.org/0000-0003-0606-2512"
+      },
+      "description": "Darwin MacBook-Pro-Raul-2018.local 23.4.0 Darwin Kernel Version 23.4.0: Fri Mar 15 00:11:05 PDT 2024; root:xnu-10063.101.17~1/RELEASE_X86_64 x86_64",
+      "endTime": "2024-04-30T10:49:33+00:00",
+      "environment": [
+        {
+          "@id": "#compss_home"
+        }
+      ],
+      "instrument": {
+        "@id": "application_sources/src/matmul_files.py"
+      },
+      "name": "COMPSs matmul_files.py execution at MacBook-Pro-Raul-2018.local",
+      "object": [
+        {
+          "@id": "dataset/inputs/A.0.0"
+        },
+        {
+          "@id": "dataset/inputs/A.0.1"
+        },
+        {
+          "@id": "dataset/inputs/A.1.0"
+        },
+        {
+          "@id": "dataset/inputs/A.1.1"
+        },
+        {
+          "@id": "dataset/inputs/B.0.0"
+        },
+        {
+          "@id": "dataset/inputs/B.0.1"
+        },
+        {
+          "@id": "dataset/inputs/B.1.0"
+        },
+        {
+          "@id": "dataset/inputs/B.1.1"
+        },
+        {
+          "@id": "dataset/outputs/C.0.0"
+        },
+        {
+          "@id": "dataset/outputs/C.0.1"
+        },
+        {
+          "@id": "dataset/outputs/C.1.0"
+        },
+        {
+          "@id": "dataset/outputs/C.1.1"
+        }
+      ],
+      "result": [
+        {
+          "@id": "dataset/outputs/C.0.0"
+        },
+        {
+          "@id": "dataset/outputs/C.0.1"
+        },
+        {
+          "@id": "dataset/outputs/C.1.0"
+        },
+        {
+          "@id": "dataset/outputs/C.1.1"
+        },
+        {
+          "@id": "./"
+        }
+      ],
+      "startTime": "2024-04-30T10:49:25+00:00"
+    },
+    {
+      "@id": "https://w3id.org/ro/wfrun/process/0.4",
+      "@type": "CreativeWork",
+      "name": "Process Run Crate",
+      "version": "0.4"
+    },
+    {
+      "@id": "https://w3id.org/ro/wfrun/workflow/0.4",
+      "@type": "CreativeWork",
+      "name": "Workflow Run Crate",
+      "version": "0.4"
+    },
+    {
+      "@id": "https://w3id.org/workflowhub/workflow-ro-crate/1.0",
+      "@type": "CreativeWork",
+      "name": "Workflow RO-Crate",
+      "version": "1.0"
+    }
+  ]
+}</script>
+  <meta name="generator" content="https://github.com/fbacall/ro-crate-ruby">
+  <meta name="keywords" content="RO-Crate">
+</head>
+<body>
+  <h1>PyCOMPSs Matrix Multiplication, out-of-core using files, reproducibility example</h1>
+  
+  <p>
+    **Name:** Matrix multiplication with Files, reproducibility example  
+**Contact Person**: support-compss@bsc.es  
+**Access Level**: public  
+**License Agreement**: Apache2  
+**Platform**: COMPSs  
+
+# Description
+Matrix multiplication is a binary operation that takes a pair of matrices and produces another matrix.
+
+If A is an n×m matrix and B is an m×p matrix, the result AB of their multiplication is an n×p matrix defined only if the number of columns m in A is equal to the number of rows m in B. When multiplying A and B, the elements of the rows in A are multiplied with corresponding columns in B.
+
+In this implementation, A and B are square matrices (same number of rows and columns), and so it is the result matrix C. Each matrix is divided in N blocks of M doubles (N hardcoded to 2, and M hardcoded to 8). The multiplication of two blocks is done by a multiply task method with a simple three-nested-loop implementation. When executed with COMPSs, the main program generates N^3^ tasks arranged as N^2^ chains of N tasks in the dependency graph.
+
+# Reproducibility
+To reproduce the exact results of this example, follow the instructions at the [Workflow Provenance section at COMPSs User Manual](https://compss-doc.readthedocs.io/en/stable/Sections/05_Tools/04_Workflow_Provenance.html)
+
+# Execution instructions
+Usage:
+```
+runcompss --lang=python src/matmul_files.py inputs_folder/ outputs_folder/
+```
+
+where:
+* inputs_folder/: Folder where A and B matrices are located
+* outputs_folder/: Folder with the resulting C matrix
+
+
+# Execution Examples
+```
+runcompss --lang=python src/matmul_files.py inputs/ outputs/
+runcompss src/matmul_files.py inputs/ outputs/
+python -m pycompss src/matmul_files.py inputs/ outputs/
+```
+
+# Build
+No build is required
+
+  </p>
+  <dl>
+    
+    
+    
+      <dt>Publisher</dt>
+      <dd>[<#ROCrate::Organization https://ror.org/05sd8tv96 @properties={"@id"=>"https://ror.org/05sd8tv96", "@type"=>"Organization", "name"=>"Barcelona Supercomputing Center"}>]</dd>
+    
+    
+      <dt>License</dt>
+      <dd>Apache-2.0</dd>
+    
+  </dl>
+
+  <h2>Contents</h2>
+  <ul>
+    
+      <li id="__data_entity_application_sources/src/matmul_files.py">
+        
+          <strong>matmul_files.py</strong>
+        
+        
+          <br/>Size: 1959
+        
+        
+          <br/>Format: text/plain
+        
+      </li>
+    
+      <li id="__data_entity_complete_graph.svg">
+        
+          <strong>complete_graph.svg</strong>
+        
+        
+          <br/>Size: 6311
+        
+        
+          <br/>Format: [["image/svg+xml", <#ROCrate::ContextualEntity https://www.nationalarchives.gov.uk/PRONOM/fmt/92 @properties={"@id"=>"https://www.nationalarchives.gov.uk/PRONOM/fmt/92", "@type"=>"WebSite", "name"=>"Scalable Vector Graphics"}>]]
+        
+      </li>
+    
+      <li id="__data_entity_application_sources/src/matmul_tasks.py">
+        
+          <strong>matmul_tasks.py</strong>
+        
+        
+          <br/>Size: 1627
+        
+        
+          <br/>Format: text/plain
+        
+      </li>
+    
+      <li id="__data_entity_App_Profile.json">
+        
+          <strong>App_Profile.json</strong>
+        
+        
+          <br/>Size: 244
+        
+        
+          <br/>Format: ["application/json", <#ROCrate::ContextualEntity https://www.nationalarchives.gov.uk/PRONOM/fmt/817 @properties={"@id"=>"https://www.nationalarchives.gov.uk/PRONOM/fmt/817", "@type"=>"WebSite", "name"=>"JSON Data Interchange Format"}>]
+        
+      </li>
+    
+      <li id="__data_entity_compss_submission_command_line.txt">
+        
+          <strong>compss_submission_command_line.txt</strong>
+        
+        
+          <br/>Size: 170
+        
+        
+          <br/>Format: text/plain
+        
+      </li>
+    
+      <li id="__data_entity_matmul_reproducibility.yaml">
+        
+          <strong>matmul_reproducibility.yaml</strong>
+        
+        
+          <br/>Size: 2279
+        
+        
+          <br/>Format: ["YAML", <#ROCrate::ContextualEntity https://www.nationalarchives.gov.uk/PRONOM/fmt/818 @properties={"@id"=>"https://www.nationalarchives.gov.uk/PRONOM/fmt/818", "@type"=>"WebSite", "name"=>"YAML"}>]
+        
+      </li>
+    
+      <li id="__data_entity_dataset/inputs/A.0.0">
+        
+          <strong>A.0.0</strong>
+        
+        
+          <br/>Size: 256
+        
+        
+      </li>
+    
+      <li id="__data_entity_dataset/inputs/A.0.1">
+        
+          <strong>A.0.1</strong>
+        
+        
+          <br/>Size: 256
+        
+        
+      </li>
+    
+      <li id="__data_entity_dataset/inputs/A.1.0">
+        
+          <strong>A.1.0</strong>
+        
+        
+          <br/>Size: 256
+        
+        
+      </li>
+    
+      <li id="__data_entity_dataset/inputs/A.1.1">
+        
+          <strong>A.1.1</strong>
+        
+        
+          <br/>Size: 256
+        
+        
+      </li>
+    
+      <li id="__data_entity_dataset/inputs/B.0.0">
+        
+          <strong>B.0.0</strong>
+        
+        
+          <br/>Size: 256
+        
+        
+      </li>
+    
+      <li id="__data_entity_dataset/inputs/B.0.1">
+        
+          <strong>B.0.1</strong>
+        
+        
+          <br/>Size: 256
+        
+        
+      </li>
+    
+      <li id="__data_entity_dataset/inputs/B.1.0">
+        
+          <strong>B.1.0</strong>
+        
+        
+          <br/>Size: 256
+        
+        
+      </li>
+    
+      <li id="__data_entity_dataset/inputs/B.1.1">
+        
+          <strong>B.1.1</strong>
+        
+        
+          <br/>Size: 256
+        
+        
+      </li>
+    
+      <li id="__data_entity_dataset/outputs/C.0.0">
+        
+          <strong>C.0.0</strong>
+        
+        
+          <br/>Size: 320
+        
+        
+      </li>
+    
+      <li id="__data_entity_dataset/outputs/C.0.1">
+        
+          <strong>C.0.1</strong>
+        
+        
+          <br/>Size: 320
+        
+        
+      </li>
+    
+      <li id="__data_entity_dataset/outputs/C.1.0">
+        
+          <strong>C.1.0</strong>
+        
+        
+          <br/>Size: 320
+        
+        
+      </li>
+    
+      <li id="__data_entity_dataset/outputs/C.1.1">
+        
+          <strong>C.1.1</strong>
+        
+        
+          <br/>Size: 320
+        
+        
+      </li>
+    
+  </ul>
+</body>
+</html>

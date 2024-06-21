@@ -46,20 +46,25 @@ def address_converter_backend(path, addr: str, dataset_hashmap: dict) -> str:
     mapped_addr = None
     
     if addr.startswith("./"):
-        addr = addr[2:]
+        addr = addr[1:]
 
+    if not addr.startswith("/"):
+            addr = "/" + addr
+    
     # Check if the address is a file or a directory and split it accordingly
     if addr.endswith("/"):
-        addr_list = addr.split("/")
+        addr_list = addr.split("/")  
     else:
         addr_list = addr.split("/")
         filename = addr_list.pop()
-  
+        
+    
     for i in range(1, len(addr_list)):
         if addr_list[i] in dataset_hashmap:
             temp_addr = os.path.join(path, addr_list[i])
             for j in range(i + 1, len(addr_list)):
                 temp_addr = os.path.join(temp_addr, addr_list[j])
+            
             if check_is_true(temp_addr):
                 mapped_addr = temp_addr
                 break
