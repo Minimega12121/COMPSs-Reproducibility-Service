@@ -1,7 +1,7 @@
 # COMPSs-Reproducibility-Service
 
 How to use:
-- Copy the workflow to reproduce into the Workflow folder
+- Copy the workflow to reproduce into the Workflow folder (should be one at a time)
 - Run the __main__.py file
 - The Results/intermediate_files produced by the experiment if any is stored inside the `./Result`
 
