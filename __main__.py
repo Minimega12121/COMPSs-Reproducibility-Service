@@ -1,8 +1,8 @@
-#This is just the basic skeleton the actual program may have different types of imports
 import json
 import os
 import subprocess
 import logging
+import yaml
 
 from repro_methods import generate_command_line
 from command_executor import executor
@@ -11,6 +11,26 @@ from result_mover import move_results_created, dataset_mover_and_application_mov
 # Rules:
 # (1) If path to folder is given, then the path should end with '/'
 # (2) It does not works if there is any path given inside the program as it can't map the path
+
+
+def get_data_persistence_status(crate_path:str) -> bool:
+    #It may not be named ro-crate-info.yaml, eg: 838-1 crate
+    yaml_file_path = None
+    for name in os.listdir(crate_path):
+        if name.endswith(".yaml"):
+            yaml_file_path = f"{crate_path}/{name}"
+            break
+    if not yaml_file_path:
+        raise Exception("ro-crate-info.yaml file not found in the crate")
+    # Open and read the YAML file
+    with open(yaml_file_path, 'r') as file:
+        # Load the content of the YAML file
+        config = yaml.safe_load(file)
+    # Extract the value of data_persistence
+    data_persistence = config.get('COMPSs Workflow Information', {}).get('data_persistence', None)
+    
+    return data_persistence
+
 
 class ReproducibilityService:
     def __init__(self, root_folder):
@@ -21,8 +41,14 @@ class ReproducibilityService:
         for filename in os.listdir(self.workflow_folder):
             self.crate_directory = os.path.join(self.workflow_folder, filename)
             break
-            
-       
+        # Cannot reproduce the workflow if data persistence is False as of now
+        try:    
+            if not get_data_persistence_status(self.crate_directory):
+                raise Exception("ERROR| Data persistence is False in the crate, cannot reproduce such a workflow.")
+        except Exception as e:
+            print(e)
+            exit(1)
+        
         self.log_folder = os.path.join(root_folder, 'log')
         self.log_file = os.path.join(self.log_folder, 'reproducability.log')
 
