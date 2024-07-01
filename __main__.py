@@ -13,7 +13,7 @@ from file_verifier import files_verifier, get_instument, get_objects
 # Rules:
 # (1) If path to folder is given, then the path should end with '/'
 # (2) It does not works if there is any path given inside the program as it can't map the path
-# ANSI escape sequences for text colors
+
 class TextColor:
     RED = '\033[91m'
     GREEN = '\033[92m'
@@ -21,9 +21,8 @@ class TextColor:
     BLUE = '\033[94m'
     RESET = '\033[0m'
 
-# Function to print colored text
 def print_colored(text, color):
-    print(f"{color}{text}{TextColor.RESET}")
+    print(f"\n{color}{text}{TextColor.RESET}\n")
 
 def get_data_persistence_status(crate_path:str) -> bool:
     #It may not be named ro-crate-info.yaml, eg: 838-1 crate
@@ -80,8 +79,7 @@ class ReproducibilityService:
        temp = dataset_mover_and_application_mover(self.crate_directory)
        executor(new_command)
        move_results_created(initial_files,temp)
-
-      
+        
          
 
 if __name__ == "__main__":

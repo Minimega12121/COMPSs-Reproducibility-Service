@@ -73,7 +73,8 @@ def command_line_generator(command: str, path: str, dataset_hashmap: dict, appli
         new_command.append(values[p2][0])
         p2 += 1        
     
-    print(new_command)
+    if(new_command[0] == "enqueue_compss"):
+        new_command[0] = "runcompss"
     
     return new_command
 
