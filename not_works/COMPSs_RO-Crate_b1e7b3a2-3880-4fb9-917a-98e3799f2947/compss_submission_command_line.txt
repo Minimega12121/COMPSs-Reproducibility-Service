@@ -1,1 +1,0 @@
-runcompss -p /monte_carlo_pi.py 10000000 100
