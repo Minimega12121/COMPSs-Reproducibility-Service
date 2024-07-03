@@ -31,13 +31,15 @@ def get_objects(entity:ROCrate):
     for val in temp:
         objects.append(val.id)
     return objects
+
+# Date_modified verifier also works but commented out as during testing it is not needed
 def files_verifier(crate_path:str,instrument:str, objects:list[str]):
     verified = True
     size_verifier = True
     date_verifier = True
     temp_size = []
     temp_path = []
-    temp_date = []
+    # temp_date = []
     crate = ROCrate(crate_path)
     instrument_path = os.path.join(crate_path, instrument)
     
@@ -69,7 +71,7 @@ def files_verifier(crate_path:str,instrument:str, objects:list[str]):
                 size_verifier = False
                 temp_size.append(os.path.join(crate_path, input))
                 
-            actual_modified_date = dt.datetime.utcfromtimestamp(os.path.getmtime(os.path.join(crate_path, input))).replace(microsecond=0).isoformat()
+            # actual_modified_date = dt.datetime.utcfromtimestamp(os.path.getmtime(os.path.join(crate_path, input))).replace(microsecond=0).isoformat()
             
             # if actual_modified_date != file_object["sdDatePublished"][:-6]:
             #     date_verifier = False

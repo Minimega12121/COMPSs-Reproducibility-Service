@@ -10,7 +10,7 @@ from .address_mapper import address_converter,addr_extractor
 
 
 def generate_command_line(self) -> list[str]:
-    print('Parsing metadata...', self.crate_directory)
+    print('\nParsing metadata...', self.crate_directory)
     path = self.crate_directory
     dataset_hashmap = addr_extractor(os.path.join(path,"dataset"))
     application_sources_hashmap = addr_extractor(os.path.join(path,"application_sources"))

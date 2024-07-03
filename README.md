@@ -5,6 +5,13 @@ How to use:
 - Run the __main__.py file
 - The Results/intermediate_files produced by the experiment if any is stored inside the `./Result`
 
+How to enable provenance generation:
+- The program will ask if you want to generate the provenance or not, at the start
+- Say yes(y) and fill the ro-crate-info.yaml file with your information
+- Currently only data persistance false provenance is generated
+- name,description,source,and source_main_file will be automatically filled by the RS Service
+- The provenance crate produced will be inside Result/ after execution
+
 The experiment to be reproduced should follow the following:
 
 - (1) If path to folder is given in the `compss_submission_command_line`, then the path should end with '/'
