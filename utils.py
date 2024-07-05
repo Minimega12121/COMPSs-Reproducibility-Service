@@ -66,7 +66,7 @@ def get_data_persistence_status(crate_path:str) -> bool:
             yaml_file_path = f"{crate_path}/{name}"
             break
     if not yaml_file_path:
-        raise Exception("ro-crate-info.yaml file not found in the crate")
+        raise FileNotFoundError("ro-crate-info.yaml file not found in the crate")
     # Open and read the YAML file
     with open(yaml_file_path, 'r') as file:
         # Load the content of the YAML file
@@ -133,4 +133,5 @@ def executor(command: list[str]):
         print("Standard Error:")
         print(stderr)
         print("Command failed with return code:", process.returncode)
+
 

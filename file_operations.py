@@ -13,15 +13,6 @@ Functions:
 - copy_all_to_cwd(src_path): Recursively copies all files and directories from the specified source
   path to the current working directory.
 
-Notes:
-- For 'move_results_created', temporary files are deleted from the current working directory.
-  Newly created files are moved to './Result'.
-- 'dataset_mover_and_application_mover' copies files from 'application_sources' and 'dataset'
-   folders located within 'crate_directory' to the current working directory.
-- 'copy_all_to_cwd' copies all files and directories from 'src_path' to the cwd.
-
-Usage:
-  The main usecase of this module is to move the final results to a 'Result' folder.
 """
 
 import os

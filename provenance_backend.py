@@ -7,17 +7,16 @@ steps to generate the provenence for COMPSs Runtime
 
 Functions:
     - update_yaml(crate_path: str)
-
-
+        Update the 'ro-crate-info.yaml' file with workflow metadata.
     - provenance_info_collector() -> bool
-      Collects the provenance information from the user
+        Collects the provenance information from the user
 """
 import os
 import time
 
 from rocrate.rocrate import ROCrate
 from ruamel.yaml import YAML
-from utils import get_instument, get_yes_or_no, get_name_and_description, get_ro_crate_info
+from utils import get_instument, get_yes_or_no, get_name_and_description, get_ro_crate_info, print_colored, TextColor
 
 def update_yaml(crate_path: str):
     """
@@ -73,7 +72,7 @@ def provenance_info_collector() -> bool:
         to generate the file. It returns True if provenance collection is enabled, False otherwise.
     """
     provenance_flag = get_yes_or_no("Do you want to see the provenance of the workflow?")
-    print(provenance_flag)
+    print("Provenance_flag:",provenance_flag)
     if provenance_flag:
         current_dir = os.getcwd()
         files = os.listdir(current_dir)
@@ -103,3 +102,18 @@ def provenance_info_collector() -> bool:
         print("Considering the filled information for provenance generation.")
 
     return provenance_flag
+
+def provenance_checker() :
+    for file in os.listdir(os.getcwd()):
+        if file == "ro-crate-info.yaml":
+            os.unlink(os.path.join(os.getcwd(), file))
+            break
+    if not os.path.exists('Result'):
+        contains_crate = False
+    else:
+        contains_crate = any(name.startswith('COMPSs_RO-Crate_') for name in os.listdir(f'Result/') if os.path.isdir(os.path.join('Result/', name)))
+
+    if contains_crate:
+        print_colored("RO_CRATE has been generated successfully inside 'Result/'", TextColor.GREEN)
+    else:
+        print_colored("Could not generate the RO_CRATE for provenance, please see the above provenance log for more details", TextColor.RED)

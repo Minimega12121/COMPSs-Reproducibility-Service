@@ -5,20 +5,20 @@ This module provides functionality to map and convert addresses of datasets
 within a given directory structure. It includes the following functions:
 
 1. `addr_extractor(path: str) -> dict`:
-   Extracts the addresses of datasets in the given path. For this particular case, 
-   it is used to extract the mapping of filenames in the crate/dataset and 
+   Extracts the addresses of datasets in the given path. For this particular case,
+   it is used to extract the mapping of filenames in the crate/dataset and
    crate/application_sources directories.
 
 2. `address_converter_backend(path: str, addr: str, dataset_hashmap: dict) -> str`:
    Converts the given address to a mapped address inside the RO_Crate
    based on the dataset hashmap.
 
-3. `address_converter(path: str, addr: str, dataset_hashmap: dict, 
+3. `address_converter(path: str, addr: str, dataset_hashmap: dict,
                             application_sources_hashmap: dict) -> str`:
-   Attempts to convert the given address first using the dataset hashmap and then 
-   using the application sources hashmap. Raises a `FileNotFoundError` if the address 
+   Attempts to convert the given address first using the dataset hashmap and then
+   using the application sources hashmap. Raises a `FileNotFoundError` if the address
    cannot be mapped in either case.
-   
+
 # Problems:
 # IF THE DIRECTORY IS TAKEN IN THE FORM OF DATA/INPUT INSTED OF DATA/INPUT/
 # THEN IT WILL NOT BE ABLE TO FIND THE DIRECTORY
@@ -31,7 +31,7 @@ import os
 def addr_extractor(path: str) -> dict:
     """
     Extracts the addresses of datasets in the given path. For this particular case,
-    it is used to extract the mapping of filenames in the crate/dataset and 
+    it is used to extract the mapping of filenames in the crate/dataset and
     crate/application_sources directories.
 
     Args:
@@ -105,10 +105,10 @@ def address_converter_backend(path: str, addr: str, dataset_hashmap: dict) -> st
     return mapped_addr
 
 def address_converter(path: str, addr: str, dataset_hashmap: dict,
-                      application_sources_hashmap: dict) -> str:
+                      application_sources_hashmap: dict, new_dataset_flag: bool) -> str:
     """
-    Attempts to convert the given address first using the dataset hashmap and 
-    then using the application sources hashmap. Raises a `FileNotFoundError` if 
+    Attempts to convert the given address first using the dataset hashmap and
+    then using the application sources hashmap. Raises a `FileNotFoundError` if
     the address  cannot be mapped in either case.
 
     Args:
@@ -123,7 +123,10 @@ def address_converter(path: str, addr: str, dataset_hashmap: dict,
     Returns:
         str: The mapped address.
     """
-    dataset_path = os.path.join(path, "dataset")
+    if new_dataset_flag:
+        dataset_path = os.path.join(os.getcwd(), "new_dataset")
+    else:
+        dataset_path = os.path.join(path, "dataset")
     application_sources_path = os.path.join(path, "application_sources")
     try:
         # First, check if the address is in the dataset

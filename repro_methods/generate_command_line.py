@@ -7,7 +7,7 @@ particularly handling paths for datasets and application sources.
 Problems:
 Anything with r'/' ot r'\' is considered a path, but it could be a flag or a value
 Plus if the command is " runcompss main.py " it will not convert the path for main.py
-so it must be declared as " runcompss /main.py " 
+so it must be declared as " runcompss /main.py "
 """
 
 import os
@@ -15,9 +15,9 @@ import shlex
 import re
 from .address_mapper import address_converter, addr_extractor
 
-def generate_command_line(self) -> list[str]:
+def generate_command_line(self, new_dataset_flag: bool) -> list[str]:
     """
-    Generates a modified command line based on the contents of a compss_submission_command_line.txt 
+    Generates a modified command line based on the contents of a compss_submission_command_line.txt
     file and the mappings of dataset and application sources in the crate directory.
 
     Args:
@@ -28,7 +28,12 @@ def generate_command_line(self) -> list[str]:
     """
     print('\nParsing metadata...', self.crate_directory)
     path = self.crate_directory
-    dataset_hashmap = addr_extractor(os.path.join(path, "dataset"))
+
+    if not new_dataset_flag:
+        dataset_hashmap = addr_extractor(os.path.join(path, "dataset"))
+    else:
+        dataset_hashmap = addr_extractor(os.path.join(os.getcwd(), "new_dataset"))
+
     application_sources_hashmap = addr_extractor(os.path.join(path, "application_sources"))
 
     compss_submission_command_path = os.path.join(path, "compss_submission_command_line.txt")
@@ -37,15 +42,15 @@ def generate_command_line(self) -> list[str]:
         compss_submission_command = next(file).strip()
 
     command = command_line_generator(compss_submission_command, path,
-                                     dataset_hashmap, application_sources_hashmap)
+                                     dataset_hashmap, application_sources_hashmap, new_dataset_flag)
 
     return command
 
 def command_line_generator(command: str, path: str, dataset_hashmap: dict,
-                           application_sources_hashmap: dict) -> list[str]:
+                           application_sources_hashmap: dict, new_dataset_flag: bool) -> list[str]:
     """
-    Generates a modified command line by replacing paths in the command with their 
-    mapped counterparts based on the dataset and application sources mappings. 
+    Generates a modified command line by replacing paths in the command with their
+    mapped counterparts based on the dataset and application sources mappings.
     Acts as the main logic behind generate_command_line.
 
     Args:
@@ -74,8 +79,8 @@ def command_line_generator(command: str, path: str, dataset_hashmap: dict,
     new_paths = []
 
     for filepath in paths:
-        new_filepath = address_converter(path, filepath[0],
-                    dataset_hashmap, application_sources_hashmap)
+        new_filepath = address_converter(path, filepath[0],dataset_hashmap,
+                                application_sources_hashmap, new_dataset_flag)
 
         new_paths.append((new_filepath, filepath[1]))
 
