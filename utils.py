@@ -2,6 +2,8 @@ import os
 import yaml
 import shutil
 import subprocess
+import threading
+import time
 
 from ruamel.yaml import YAML
 from rocrate.rocrate import ROCrate
@@ -118,20 +120,63 @@ def get_ro_crate_info():
     except Exception as e:
         print(f'Error copying ro-crate-info.yaml file from {source}: {e}')
 
+
 def executor(command: list[str]):
+    joined_command = " ".join(command)
+    print_colored(f"Executing command: {joined_command}", TextColor.BLUE)
+
+    # Create log directory if it doesn't exist
+    log_dir = os.path.join(os.getcwd(), "log")
+    if not os.path.exists(log_dir):
+        os.makedirs(log_dir)
+
+    # Create unique log file names
+    timestamp = time.strftime("%Y%m%d-%H%M%S")
+    stdout_log = os.path.join(log_dir, f"out_{timestamp}.log")
+    stderr_log = os.path.join(log_dir, f"err_{timestamp}.log")
+
     # Start the subprocess
     process = subprocess.Popen(command, stdout=subprocess.PIPE, stderr=subprocess.PIPE, text=True)
 
-    # Read the output and error streams
-    stdout, stderr = process.communicate()
+    # Define functions to read and log output
+    def read_stdout(pipe, log_file):
+        with open(log_file, 'w') as f:
+            for line in iter(pipe.readline, ''):
+                print(line.strip())
+                f.write(line)
+        pipe.close()
 
+    def read_stderr(pipe, log_file):
+        with open(log_file, 'w') as f:
+            for line in iter(pipe.readline, ''):
+                print(line.strip())
+                f.write(line)
+        pipe.close()
+
+    # Create threads to read and log stdout and stderr
+    stdout_thread = threading.Thread(target=read_stdout, args=(process.stdout, stdout_log))
+    stderr_thread = threading.Thread(target=read_stderr, args=(process.stderr, stderr_log))
+
+    stdout_thread.start()
+    stderr_thread.start()
+
+    # Wait for the process to complete
+    process.wait()
+
+    # Ensure all output has been logged
+    stdout_thread.join()
+    stderr_thread.join()
+
+    # Print log file locations
+    print(f"Standard output logged to: {stdout_log}")
+    print(f"Standard error logged to: {stderr_log}")
+
+    # Check the return code
     if process.returncode == 0:
-        print("Standard Output:")
-        print(stdout)
         print("Command executed successfully.")
+        return True
     else:
-        print("Standard Error:")
-        print(stderr)
         print("Command failed with return code:", process.returncode)
+        return False
 
 

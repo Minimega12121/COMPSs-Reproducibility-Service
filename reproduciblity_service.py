@@ -9,6 +9,7 @@ from file_verifier import files_verifier
 from utils import get_instument, get_objects, print_colored, TextColor, get_data_persistence_status, executor, get_yes_or_no
 from new_dataset_backend import new_dataset_info_collector
 from provenance_backend import provenance_info_collector, update_yaml, provenance_checker
+from get_workflow import get_workflow
 
 
 # Rules:
@@ -24,17 +25,12 @@ class ReproducibilityService:
         self.root_folder = root_folder
         self.workflow_folder = os.path.join(root_folder, 'Workflow')
 
-        # Get the first directory in the Workflow folder {Assuming only crate is inside the workflow folder}
-
         if len(os.listdir(self.workflow_folder)) == 0:
             print_colored("ERROR| No crate found in the workflow folder.", TextColor.RED)
             sys.exit(1)
 
-        for filename in os.listdir(self.workflow_folder):
-            self.crate_directory = os.path.join(self.workflow_folder, filename)
-            break
-        # Cannot reproduce the workflow if data persistence is False as of now
-
+        # Get the first directory in the Workflow folder {Assuming only crate is inside the workflow folder}
+        self.crate_directory = os.path.join(self.workflow_folder, os.listdir(self.workflow_folder)[0])
 
         try:
             if not get_data_persistence_status(self.crate_directory):
@@ -66,22 +62,24 @@ class ReproducibilityService:
 
        if self.provenance_flag: # add the provenance flag to the command
            new_command.insert(1, "--provenance")
-
-       print("\nSubmitting the command to COMPSs Runtime:\n", (" ").join(new_command),"\n")
+       # for debugging: new_command.insert(1, "-d")
        # run the new command
        temp = dataset_mover_and_application_mover(self.crate_directory)
-       executor(new_command)
+       result = executor(new_command)
        move_results_created(initial_files,temp)
+       return result
 
 if __name__ == "__main__":
-
-    new_dataset_flag = get_yes_or_no("Do you want to reproducs the crate on a new dataset?")
-
-
+    get_workflow()
+    new_dataset_flag = get_yes_or_no("Do you want to reproduce the crate on a new dataset?")
     provenance_flag = provenance_info_collector()
+
     rs = ReproducibilityService(os.getcwd(),provenance_flag, new_dataset_flag)
-    rs.run()
-    print_colored("Reproducibility Service has been executed successfully", TextColor.GREEN)
+    result = rs.run()
+    if result:
+        print_colored("Reproducibility Service has been executed successfully", TextColor.GREEN)
+    else:
+        print_colored("Reproducibility Service has been failed", TextColor.RED)
 
     if provenance_flag:
        provenance_checker()
