@@ -14,7 +14,7 @@ import os
 from rocrate.rocrate import ROCrate
 from utils import get_by_id
 
-def files_verifier(crate_path: str, instrument: str, objects: list[str]):
+def files_verifier(crate_path: str, instrument: str, objects: dict, remote_dataset_dict: dict):
     """
     Verify files within an RO-Crate against their metadata.
 
@@ -51,30 +51,35 @@ def files_verifier(crate_path: str, instrument: str, objects: list[str]):
 
     #Verify the objects/inputs
     crate = ROCrate(crate_path)
-    if objects is not None:
-        for input in objects:
-            if not os.path.exists(os.path.join(crate_path, input)):
-                verified = False
-                temp_path.append(os.path.join(crate_path, input))
-                continue
-            file_object = get_by_id(crate, input)
-            content_size = file_object["contentSize"]
-            # Verify the above content size with the actual file size
 
-            # Get the actual file size
-            actual_size = os.path.getsize(os.path.join(crate_path, input))
+    for name,input in objects.items():
+        if remote_dataset_dict.get(name): # Do not verifiy the local objects if remote dataset exists
+            continue
+        # Skip the remote objects
+        if input.startswith("http"):
+            continue
+        if not os.path.exists(os.path.join(crate_path, input)):
+            verified = False
+            temp_path.append(os.path.join(crate_path, input))
+            continue
+        file_object = get_by_id(crate, input)
+        content_size = file_object["contentSize"]
+        # Verify the above content size with the actual file size
 
-            # Verify the content size with the actual file size
-            if actual_size != content_size:
-                size_verifier = False
-                temp_size.append(os.path.join(crate_path, input))
+        # Get the actual file size
+        actual_size = os.path.getsize(os.path.join(crate_path, input))
 
-            # actual_modified_date = dt.datetime.utcfromtimestamp(os.path.getmtime
-            # (os.path.join(crate_path, input))).replace(microsecond=0).isoformat()
+        # Verify the content size with the actual file size
+        if actual_size != content_size:
+            size_verifier = False
+            temp_size.append(os.path.join(crate_path, input))
 
-            # if actual_modified_date != file_object["sdDatePublished"][:-6]:
-            #     date_verifier = False
-            #     temp_date.append(os.path.join(crate_path, input))
+        # actual_modified_date = dt.datetime.utcfromtimestamp(os.path.getmtime
+        # (os.path.join(crate_path, input))).replace(microsecond=0).isoformat()
+
+        # if actual_modified_date != file_object["sdDatePublished"][:-6]:
+        #     date_verifier = False
+        #     temp_date.append(os.path.join(crate_path, input))
 
     # if not date_verifier:
     #     print_colored(f"The dateModified of the following files is
@@ -88,3 +93,5 @@ def files_verifier(crate_path: str, instrument: str, objects: list[str]):
 
     if not verified:
         raise FileNotFoundError(f"Files missing in directory: {temp_path}")
+
+

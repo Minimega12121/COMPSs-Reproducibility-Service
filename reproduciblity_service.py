@@ -4,12 +4,13 @@ import time
 from rocrate.rocrate import ROCrate
 
 from repro_methods import generate_command_line
-from file_operations import move_results_created, dataset_mover_and_application_mover
+from file_operations import move_results_created, dataset_mover_and_application_mover, remote_dataset_mover
 from file_verifier import files_verifier
-from utils import get_instument, get_objects, print_colored, TextColor, get_data_persistence_status, executor, get_yes_or_no
+from utils import get_instument, get_objects,get_objects_dict,print_colored, TextColor, get_data_persistence_status, executor, get_yes_or_no
 from new_dataset_backend import new_dataset_info_collector
 from provenance_backend import provenance_info_collector, update_yaml, provenance_checker
 from get_workflow import get_workflow
+from remote_dataset import remote_dataset
 
 
 # Rules:
@@ -43,8 +44,10 @@ class ReproducibilityService:
                 print("Reproducing the crate on the old dataset.")
                 crate = ROCrate(self.crate_directory)
                 instrument= get_instument(crate)
-                objects= get_objects(crate)
-                files_verifier(self.crate_directory, instrument, objects)
+                objects= get_objects_dict(crate)
+                # download the remote data-set if it exists and return true if it exists
+                (self.remote_dataset_flag, remote_dataset_dict) = remote_dataset(crate)
+                files_verifier(self.crate_directory, instrument, objects, remote_dataset_dict)
 
             if provenance_flag: #update the sorces inside the yaml file
                 update_yaml(self.crate_directory)
@@ -58,19 +61,27 @@ class ReproducibilityService:
 
     def run(self):
        initial_files = set(os.listdir(os.getcwd()))
-       new_command = generate_command_line(self, self.new_dataset_flag)
+       new_command = generate_command_line(self)
 
        if self.provenance_flag: # add the provenance flag to the command
            new_command.insert(1, "--provenance")
        # for debugging: new_command.insert(1, "-d")
        # run the new command
        temp = dataset_mover_and_application_mover(self.crate_directory)
+       if self.remote_dataset_flag:
+           temp = temp.union(remote_dataset_mover(os.getcwd()))
        result = executor(new_command)
        move_results_created(initial_files,temp)
        return result
 
 if __name__ == "__main__":
-    get_workflow()
+
+    try:
+        get_workflow()
+    except Exception as e:
+        print_colored(e,TextColor.RED)
+        sys.exit(1)
+
     new_dataset_flag = get_yes_or_no("Do you want to reproduce the crate on a new dataset?")
     provenance_flag = provenance_info_collector()
 

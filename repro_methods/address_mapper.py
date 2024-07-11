@@ -105,7 +105,7 @@ def address_converter_backend(path: str, addr: str, dataset_hashmap: dict) -> st
     return mapped_addr
 
 def address_converter(path: str, addr: str, dataset_hashmap: dict,
-                      application_sources_hashmap: dict, new_dataset_flag: bool) -> str:
+                      application_sources_hashmap: dict,remote_dataset_hashmap:dict, dataset_flags: tuple[bool, bool]) -> str:
     """
     Attempts to convert the given address first using the dataset hashmap and
     then using the application sources hashmap. Raises a `FileNotFoundError` if
@@ -116,6 +116,8 @@ def address_converter(path: str, addr: str, dataset_hashmap: dict,
         addr (str): Address to be converted.
         dataset_hashmap (dict): Hashmap generated from addr_extractor.
         application_sources_hashmap (dict): Hashmap generated from addr_extractor.
+        remote_dataset_hashmap (dict): Hashmap generated from addr_extractor.
+        dataset_flags (tuple[bool, bool]): (remote_dataset_flag, new_dataset_flag)
 
     Raises:
         FileNotFoundError: Cannot find the address inside the RO_Crate.
@@ -123,22 +125,33 @@ def address_converter(path: str, addr: str, dataset_hashmap: dict,
     Returns:
         str: The mapped address.
     """
-    if new_dataset_flag:
+    errors = []
+
+    if dataset_flags[1]:
         dataset_path = os.path.join(os.getcwd(), "new_dataset")
     else:
         dataset_path = os.path.join(path, "dataset")
     application_sources_path = os.path.join(path, "application_sources")
-    try:
-        # First, check if the address is in the dataset
-        return address_converter_backend(dataset_path, addr, dataset_hashmap)
-    except FileNotFoundError as e1:
-        try:
-            # If the dataset address conversion fails, try the application sources
-            return address_converter_backend(application_sources_path, addr,
-                                             application_sources_hashmap)
-        except FileNotFoundError as e2:
-            # If both fail, raise an exception with context from both errors
-            raise FileNotFoundError(
-                f"Could not find the mapped address for: {addr}\n"
-                f"Dataset Error: {e1}\nApplication Sources Error: {e2}"
-            ) from e2
+
+     # Define the paths to try for address conversion
+    paths_to_try = [
+        (dataset_path, dataset_hashmap, "Dataset Error"),
+        (application_sources_path, application_sources_hashmap, "Application Sources Error")
+    ]
+
+    if dataset_flags[0]:
+        paths_to_try.insert(0,(os.path.join(os.getcwd(), "remote_dataset"), remote_dataset_hashmap, "Remote Dataset Error"))
+
+    for path, hashmap, error_context in paths_to_try: # try all the paths one by one and return where
+        try:                                           # file is found,if not found append the error to the list
+            return address_converter_backend(path, addr, hashmap)
+        except FileNotFoundError as e:
+            errors.append((error_context, e))
+
+    handle_address_conversion_failure(addr, errors)
+
+def handle_address_conversion_failure(addr, errors):
+    error_messages = "\n".join(f"{context}: {err}" for context, err in errors)
+    raise FileNotFoundError(
+        f"Could not find the mapped address for: {addr}\n{error_messages}"
+    ) from errors[-1][1]

@@ -82,6 +82,23 @@ def dataset_mover_and_application_mover(crate_directory) -> set[str]:
 
     return input_files_copied
 
+def remote_dataset_mover(directory) -> set[str]:
+    """
+    Copies all files from the 'remote_dataset' folder in the current working directory
+    to the current working directory.
+
+    Args:
+    directory (str): Path to the 'remote_dataset' directory.
+
+    Returns:
+    set: A set of names of the files and directories copied to the current working directory.
+    """
+    remote_dataset_folder = os.path.join(directory, "remote_dataset")
+    input_files_copied = set()
+    input_files_copied.add("./remote_dataset")
+    input_files_copied = input_files_copied.union(copy_all_to_cwd(remote_dataset_folder))
+    return input_files_copied
+
 def copy_all_to_cwd(src_path) -> set[str]:
     """
     Copies all files and folders from the specified source path to the current working directory.

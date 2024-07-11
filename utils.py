@@ -4,6 +4,7 @@ import shutil
 import subprocess
 import threading
 import time
+import urllib.request
 
 from ruamel.yaml import YAML
 from rocrate.rocrate import ROCrate
@@ -47,6 +48,18 @@ def get_objects(entity:ROCrate):
 
     for val in temp:
         objects.append(val.id)
+    return objects
+
+def get_objects_dict(entity:ROCrate):
+    createAction = get_Create_Action(entity)
+    objects= {}
+    try: # It is not necessary to have inputs/objects in Create Action
+        temp = createAction["object"]
+    except:
+        return None
+
+    for input in temp:
+        objects[input["name"]] = input.id
     return objects
 
 def get_yes_or_no(msg :str) :
@@ -178,5 +191,17 @@ def executor(command: list[str]):
     else:
         print("Command failed with return code:", process.returncode)
         return False
+
+def download_file(url: str , download_path: str, file_name: str):
+    if not os.path.exists(download_path):
+        os.makedirs(download_path)
+    # Create the full path to the file
+    full_path = os.path.join(download_path, file_name)
+
+    # Download the file and save it to the specified path
+    urllib.request.urlretrieve(url, full_path)
+
+    print(f"File downloaded as {full_path}")
+
 
 

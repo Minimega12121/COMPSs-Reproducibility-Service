@@ -15,7 +15,7 @@ import shlex
 import re
 from .address_mapper import address_converter, addr_extractor
 
-def generate_command_line(self, new_dataset_flag: bool) -> list[str]:
+def generate_command_line(self) -> list[str]:
     """
     Generates a modified command line based on the contents of a compss_submission_command_line.txt
     file and the mappings of dataset and application sources in the crate directory.
@@ -29,7 +29,13 @@ def generate_command_line(self, new_dataset_flag: bool) -> list[str]:
     print('\nParsing metadata...', self.crate_directory)
     path = self.crate_directory
 
-    if not new_dataset_flag:
+    dataset_flags = (self.remote_dataset_flag, self.new_dataset_flag)
+
+    remote_dataset_hashmap = {}
+    if self.remote_dataset_flag:
+        remote_dataset_hashmap = addr_extractor(os.path.join(os.getcwd(), "remote_dataset"))
+
+    if not self.new_dataset_flag:
         dataset_hashmap = addr_extractor(os.path.join(path, "dataset"))
     else:
         dataset_hashmap = addr_extractor(os.path.join(os.getcwd(), "new_dataset"))
@@ -42,12 +48,12 @@ def generate_command_line(self, new_dataset_flag: bool) -> list[str]:
         compss_submission_command = next(file).strip()
 
     command = command_line_generator(compss_submission_command, path,
-                                     dataset_hashmap, application_sources_hashmap, new_dataset_flag)
+                                     dataset_hashmap, application_sources_hashmap,remote_dataset_hashmap,dataset_flags)
 
     return command
 
 def command_line_generator(command: str, path: str, dataset_hashmap: dict,
-                           application_sources_hashmap: dict, new_dataset_flag: bool) -> list[str]:
+                           application_sources_hashmap: dict, remote_dataset_hashmap: dict, dataset_flags: tuple[bool,bool]) -> list[str]:
     """
     Generates a modified command line by replacing paths in the command with their
     mapped counterparts based on the dataset and application sources mappings.
@@ -80,7 +86,7 @@ def command_line_generator(command: str, path: str, dataset_hashmap: dict,
 
     for filepath in paths:
         new_filepath = address_converter(path, filepath[0],dataset_hashmap,
-                                application_sources_hashmap, new_dataset_flag)
+                                application_sources_hashmap, remote_dataset_hashmap, dataset_flags)
 
         new_paths.append((new_filepath, filepath[1]))
 
