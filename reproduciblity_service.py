@@ -13,11 +13,9 @@ from get_workflow import get_workflow
 from remote_dataset import remote_dataset
 
 
-# Rules:
+# User-guidelines:
 # (1) If path to folder is given, then the path should end with '/'
 # (2) It does not works if there is any path given inside the program as it can't map the path
-
- # TO DO: CHANGE THE DIFFERENT FLAGS FOR REPRODUCIBILITY SERVICE AS ENUM
 
 class ReproducibilityService:
     def __init__(self, root_folder, provenance_flag:bool, new_dataset_flag:bool):
@@ -48,7 +46,6 @@ class ReproducibilityService:
                 # download the remote data-set if it exists and return true if it exists
                 (self.remote_dataset_flag, remote_dataset_dict) = remote_dataset(crate)
                 files_verifier(self.crate_directory, instrument, objects, remote_dataset_dict)
-
             if provenance_flag: #update the sorces inside the yaml file
                 update_yaml(self.crate_directory)
 

@@ -52,8 +52,11 @@ def files_verifier(crate_path: str, instrument: str, objects: dict, remote_datas
     #Verify the objects/inputs
     crate = ROCrate(crate_path)
 
+    if objects == None:
+        return
+
     for name,input in objects.items():
-        if remote_dataset_dict.get(name): # Do not verifiy the local objects if remote dataset exists
+        if remote_dataset_dict != None and remote_dataset_dict.get(name): # Do not verifiy the local objects if remote dataset exists
             continue
         # Skip the remote objects
         if input.startswith("http"):
@@ -63,16 +66,17 @@ def files_verifier(crate_path: str, instrument: str, objects: dict, remote_datas
             temp_path.append(os.path.join(crate_path, input))
             continue
         file_object = get_by_id(crate, input)
-        content_size = file_object["contentSize"]
-        # Verify the above content size with the actual file size
+        if "contentSize" in file_object:
+            content_size = file_object["contentSize"]
+            # Verify the above content size with the actual file size
 
-        # Get the actual file size
-        actual_size = os.path.getsize(os.path.join(crate_path, input))
+            # Get the actual file size
+            actual_size = os.path.getsize(os.path.join(crate_path, input))
 
-        # Verify the content size with the actual file size
-        if actual_size != content_size:
-            size_verifier = False
-            temp_size.append(os.path.join(crate_path, input))
+            # Verify the content size with the actual file size
+            if actual_size != content_size:
+                size_verifier = False
+                temp_size.append(os.path.join(crate_path, input))
 
         # actual_modified_date = dt.datetime.utcfromtimestamp(os.path.getmtime
         # (os.path.join(crate_path, input))).replace(microsecond=0).isoformat()

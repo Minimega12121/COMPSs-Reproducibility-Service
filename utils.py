@@ -41,9 +41,9 @@ def get_instument(entity:ROCrate):
 def get_objects(entity:ROCrate):
     createAction = get_Create_Action(entity)
     objects= []
-    try: # It is not necessary to have inputs/objects in Create Action
+    if "object" in createAction: # It is not necessary to have inputs/objects in Create Action
         temp = createAction["object"]
-    except:
+    else:
         return None
 
     for val in temp:
@@ -53,9 +53,9 @@ def get_objects(entity:ROCrate):
 def get_objects_dict(entity:ROCrate):
     createAction = get_Create_Action(entity)
     objects= {}
-    try: # It is not necessary to have inputs/objects in Create Action
+    if "object" in createAction: # It is not necessary to have inputs/objects in Create Action
         temp = createAction["object"]
-    except:
+    else:
         return None
 
     for input in temp:

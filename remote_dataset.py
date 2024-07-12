@@ -5,11 +5,11 @@ def remote_dataset(crate: ROCrate) -> bool:
 
     createAction = get_Create_Action(crate)
     remote_datasets= {}
-
-    try: # It is not necessary to have inputs/objects in Create Action
+    print(createAction)
+    if "object" in  createAction:
         temp = createAction["object"]
-    except:
-        return None
+    else:
+        return (False, None)
 
     print(temp)
     for input in temp: # get the remote_datasets mapped with their names
