@@ -3,7 +3,7 @@ import shutil
 import zipfile
 import urllib.parse
 # Works/workflow-838-1.crate.zip
-from utils import print_colored, TextColor, executor, get_yes_or_no
+from utils import print_colored,print_colored_ns, TextColor, executor, get_yes_or_no
 
 def get_workflow(execution_path: str):
     workflow_path = os.path.join(execution_path, "Workflow")
@@ -60,3 +60,64 @@ def get_workflow(execution_path: str):
         os.remove(crate_zip_path)
 
     print(f"The workflow has been successfully extracted to {workflow_path}")
+
+def get_more_flags(command: list[str]) -> list[str]:
+    print_colored("The current command is as follows:", TextColor.YELLOW)
+    print_colored_ns(" ".join(command), TextColor.YELLOW)
+    more = get_yes_or_no("Do you want to add more flags to the compss runtime command shown above")
+
+    if not more: # return if no more flags are needed
+        return command
+
+    try:
+        n = int(input("How many flags do you want to add? Enter the number: ")) #raise value error if not an integer
+    except ValueError:
+        print("Invalid input. Please enter a valid integer.")
+        return None
+
+    flags = []
+    for i in range(n):
+        flags.append(input(f"Enter flag {i+1}: ").strip())
+
+    for flag in flags:
+        command.insert(1, flag)
+
+    return command
+
+def get_change_values(command : list[str]) -> list[str]:
+    print_colored("The current command is as follows:", TextColor.YELLOW)
+    print_colored_ns(" ".join(command), TextColor.YELLOW)
+    if not get_yes_or_no("Do you want to change anything from the above command?"):
+        return command
+    else:
+        n = len(command)
+        print_colored("The current command indexed is as follows:", TextColor.YELLOW)
+        for i in range(n):
+            print_colored_ns(f"{i+1}. {command[i]}", TextColor.YELLOW)
+        satisfied = True
+        while satisfied:
+            try:
+                m = int(input("How many values do you want to change? Enter the number: "))
+            except ValueError:
+                print("Invalid input. Please enter a valid integer.")
+                return command
+
+            for i in range(m):
+                try:
+                    index = int(input(f"Enter the index of the value you want to change (1-{len(command)}): "))
+                    if index < 1 or index > len(command):
+                        raise ValueError
+                except ValueError:
+                    print("Invalid input. Please enter a valid integer between 1 and the number of values.")
+                    return command
+
+                command[index-1] = input(f"Enter the new value for index {index}: ").strip()
+
+            for i in range(n):
+                print_colored_ns(f"{i+1}. {command[i]}", TextColor.YELLOW)
+            print_colored("Are you happy with the changes above?", TextColor.YELLOW)
+            satisfied = not get_yes_or_no("")
+
+
+    return command
+    ...

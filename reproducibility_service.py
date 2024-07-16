@@ -9,7 +9,7 @@ from file_verifier import files_verifier
 from utils import get_instument,get_objects_dict,print_colored, TextColor, get_data_persistence_status, executor, get_yes_or_no
 from new_dataset_backend import new_dataset_info_collector
 from provenance_backend import provenance_info_collector, update_yaml, provenance_checker
-from get_workflow import get_workflow
+from get_workflow import get_workflow, get_more_flags, get_change_values
 from remote_dataset import remote_dataset
 
 EXECUTION_PATH = None
@@ -24,7 +24,7 @@ def interrupt_handler(signal, frame): # signal handler for cleaning up in case o
     print_colored("Reproducibility Service has been interrupted.", TextColor.RED)
     if len(CLEAN_UP_FILES)>0:
         try:
-            print("Cleaning up the execution directory...")
+            print("Cleaning up intermediate files...")
             cleanup(CLEAN_UP_FILES)
         except Exception as e:
             print_colored(e, TextColor.RED)
@@ -76,20 +76,33 @@ class ReproducibilityService:
         self.log_folder = os.path.join(EXECUTION_PATH, 'log')
 
     def run(self):
-       initial_files = set(os.listdir(os.getcwd()))
-       new_command = generate_command_line(self)
+        try:
+            initial_files = set(os.listdir(os.getcwd()))
+            new_command = generate_command_line(self)
 
-       if self.provenance_flag: # add the provenance flag to the command
-           new_command.insert(1, "--provenance")
-       # for debugging: new_command.insert(1, "-d")
-       # run the new command
-       global CLEAN_UP_FILES
-       CLEAN_UP_FILES = dataset_mover_and_application_mover(self.crate_directory)
-       if self.remote_dataset_flag:
-           CLEAN_UP_FILES = CLEAN_UP_FILES.union(remote_dataset_mover(self.crate_directory))
-       result = executor(new_command,EXECUTION_PATH)
-       move_results_created(initial_files,CLEAN_UP_FILES, EXECUTION_PATH)
-       return result
+            if self.provenance_flag: # add the provenance flag to the command
+                new_command.insert(1, "--provenance")
+            # for debugging: new_command.insert(1, "-d")
+            # run the new command
+            global CLEAN_UP_FILES
+            CLEAN_UP_FILES = dataset_mover_and_application_mover(self.crate_directory)
+            if self.remote_dataset_flag:
+                CLEAN_UP_FILES = CLEAN_UP_FILES.union(remote_dataset_mover(self.crate_directory))
+
+            new_command = get_more_flags(new_command) # ask user for more flags he/she wants to add to the final compss command
+            
+            new_command = get_change_values(new_command)
+
+            result = executor(new_command,EXECUTION_PATH)
+            move_results_created(initial_files,CLEAN_UP_FILES, EXECUTION_PATH)
+            return result
+
+        except Exception as e:
+            print_colored(e, TextColor.RED)
+            print("Cleaning up intermediate files...")
+            cleanup(CLEAN_UP_FILES)
+            return False
+
 
 if __name__ == "__main__":
 
@@ -118,3 +131,4 @@ if __name__ == "__main__":
        provenance_checker(EXECUTION_PATH)
 
     sys.exit(0)
+# remote_dataset_example: https://workflowhub.eu/workflows/1072/ro_crate?version=1

@@ -21,6 +21,9 @@ class TextColor:
 def print_colored(text, color):
     print(f"\n{color}{text}{TextColor.RESET}\n")
 
+def print_colored_ns(text, color):
+    print(f"{color}{text}{TextColor.RESET}")
+
 def get_by_id(entity:ROCrate, id:str):
     # Loop through all entities in the RO-Crate
     for entity in entity.get_entities():
