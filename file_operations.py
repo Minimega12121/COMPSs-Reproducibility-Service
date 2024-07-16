@@ -17,8 +17,9 @@ Functions:
 
 import os
 import shutil
+import datetime
 
-def move_results_created(initial_files, temp):
+def move_results_created(initial_files, temp, execution_path: str):
     """
     Removes temporary files and moves newly created files to a 'Result' folder.
 
@@ -27,8 +28,8 @@ def move_results_created(initial_files, temp):
     temp (list): List of temporary files to be removed.
 
     """
-    result_folder = "./Result"
-    # Get the current list of files in the CWD
+    result_folder_path = os.path.join(execution_path, 'Result')
+    # Get the current list of files in the CWD and remove the clean-up files, that were copied for the execution
     cwd = os.getcwd()
     for filename in temp:
         file_path = os.path.join(cwd, filename)
@@ -42,21 +43,21 @@ def move_results_created(initial_files, temp):
     new_files = current_files - initial_files
 
     if new_files:
-        # Create the Result folder if it doesn't exist
-        result_folder_path = os.path.join(cwd, result_folder)
-        if not os.path.exists(result_folder_path):
+        if not os.path.exists(result_folder_path): # Create the Result folder
             os.makedirs(result_folder_path)
-        else:
-            # Clear the existing files in the Result folder
-            for filename in os.listdir(result_folder_path):
-                file_path = os.path.join(result_folder_path, filename)
-                if os.path.isfile(file_path):
-                    os.unlink(file_path)
-                elif os.path.isdir(file_path):
-                    shutil.rmtree(file_path)
-
+        # else:    # no need after separating the subdirectory of execution-commit
+        #     # Clear the existing files in the Result folder
+        #     for filename in os.listdir(result_folder_path):
+        #         file_path = os.path.join(result_folder_path, filename)
+        #         if os.path.isfile(file_path):
+        #             os.unlink(file_path)
+        #         elif os.path.isdir(file_path):
+        #             shutil.rmtree(file_path)
+        print(new_files)
         # Move the new files to the Result folder
         for new_file in new_files:
+            if new_file.startswith("reproducibility_service_"): #cannot move the execution directory into iteself
+                continue
             src_path = os.path.join(cwd, new_file)
             dest_path = os.path.join(result_folder_path, new_file)
             shutil.move(src_path, dest_path)
@@ -82,7 +83,7 @@ def dataset_mover_and_application_mover(crate_directory) -> set[str]:
 
     return input_files_copied
 
-def remote_dataset_mover(directory) -> set[str]:
+def remote_dataset_mover(directory: str) -> set[str]:
     """
     Copies all files from the 'remote_dataset' folder in the current working directory
     to the current working directory.
@@ -94,10 +95,8 @@ def remote_dataset_mover(directory) -> set[str]:
     set: A set of names of the files and directories copied to the current working directory.
     """
     remote_dataset_folder = os.path.join(directory, "remote_dataset")
-    input_files_copied = set()
-    input_files_copied.add("./remote_dataset")
-    input_files_copied = input_files_copied.union(copy_all_to_cwd(remote_dataset_folder))
-    return input_files_copied
+    return  copy_all_to_cwd(remote_dataset_folder)
+
 
 def copy_all_to_cwd(src_path) -> set[str]:
     """
@@ -134,3 +133,25 @@ def copy_all_to_cwd(src_path) -> set[str]:
 
     print(f"{len(copied_items)} items copied to the current working directory.")
     return copied_items
+
+def cleanup(temp: set):
+    cwd = os.getcwd()
+    for filename in temp:
+        file_path = os.path.join(cwd, filename)
+        if os.path.isfile(file_path):
+            os.unlink(file_path)
+        elif os.path.isdir(file_path):
+            shutil.rmtree(file_path)
+
+def create_new_execution_directory(SERVICE_PATH: str):
+    # Create a unique sub-directory name based on the current timestamp
+    timestamp = datetime.datetime.now().strftime('%Y%m%d_%H%M%S')
+    new_execution_dir = os.path.join(os.getcwd(), f'reproducibility_service_{timestamp}')
+    # Create the new sub-directory
+    os.makedirs(new_execution_dir)
+    # required directories for the service
+    os.makedirs(os.path.join(new_execution_dir, 'log'))
+    os.makedirs(os.path.join(new_execution_dir, 'Workflow'))
+    os.makedirs(os.path.join(new_execution_dir, 'APP-REQ'))
+    shutil.copy2(os.path.join(SERVICE_PATH,"APP-REQ/ro-crate-info.yaml"),os.path.join(new_execution_dir, 'APP-REQ/ro-crate-info.yaml'))
+    return new_execution_dir

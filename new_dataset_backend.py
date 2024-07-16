@@ -19,16 +19,13 @@ def print_directory_contents(path, level=0):
 
 
 def new_dataset_info_collector(crate_directory:str):
-    if not os.path.exists("new_dataset"):
-        os.makedirs("new_dataset")
-    time.sleep(1)
-    print("\nPlease copy the new dataset to the 'new_dataset' folder\n")
+    new_dataset_path = os.path.join(crate_directory, "new_dataset")
+    os.makedirs(new_dataset_path)
+    print(f"\nPlease copy the new dataset to the 'new_dataset' folder :\n")
+    print_colored("New dataset path: " + new_dataset_path, TextColor.BLUE)
     print_colored("WARNING| MAKE SURE THE NEW DATASET FOLLOWS THE SAME DIRECTORY STRUCTURE AS THE OLD DATASET", TextColor.RED)
-    time.sleep(1)
     print("The old directory structure for reference is as follows:\n")
     print_directory_contents(os.path.join(crate_directory, "dataset"))
-    time.sleep(3)
     check = False
     while not check:
-        time.sleep(1)
         check = get_yes_or_no("Have you copied the new dataset to the 'new_dataset' folder?")

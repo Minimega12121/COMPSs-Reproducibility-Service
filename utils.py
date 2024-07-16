@@ -5,6 +5,7 @@ import subprocess
 import threading
 import time
 import urllib.request
+import datetime
 
 from ruamel.yaml import YAML
 from rocrate.rocrate import ROCrate
@@ -111,17 +112,15 @@ def get_name_and_description(crate_path: str) -> tuple[str, str]:
 
     return name, description
 
-def get_ro_crate_info():
+def get_ro_crate_info(execution_path: str):
     """
     Copies a ro-crate-info.yaml files to the current working directory.
 
     """
-    source = "./APP-REQ/ro-crate-info.yaml"
+    source = os.path.join(execution_path,"APP-REQ/ro-crate-info.yaml")
     # Get the current working directory
     cwd = os.getcwd()
-
-    # Get the base name of the source file
-    file_name = os.path.basename(source)
+    file_name = "ro-crate-info.yaml"
 
     # Construct the full destination path
     destination = os.path.join(cwd, file_name)
@@ -134,12 +133,12 @@ def get_ro_crate_info():
         print(f'Error copying ro-crate-info.yaml file from {source}: {e}')
 
 
-def executor(command: list[str]):
+def executor(command: list[str], execution_path: str) :
     joined_command = " ".join(command)
     print_colored(f"Executing command: {joined_command}", TextColor.BLUE)
 
     # Create log directory if it doesn't exist
-    log_dir = os.path.join(os.getcwd(), "log")
+    log_dir = os.path.join(execution_path, "log")
     if not os.path.exists(log_dir):
         os.makedirs(log_dir)
 
@@ -202,6 +201,8 @@ def download_file(url: str , download_path: str, file_name: str):
     urllib.request.urlretrieve(url, full_path)
 
     print(f"File downloaded as {full_path}")
+
+
 
 
 

@@ -1,28 +1,48 @@
 import os
 import sys
-import time
+import signal
 from rocrate.rocrate import ROCrate
 
 from repro_methods import generate_command_line
-from file_operations import move_results_created, dataset_mover_and_application_mover, remote_dataset_mover
+from file_operations import move_results_created, dataset_mover_and_application_mover, cleanup,create_new_execution_directory, remote_dataset_mover
 from file_verifier import files_verifier
-from utils import get_instument, get_objects,get_objects_dict,print_colored, TextColor, get_data_persistence_status, executor, get_yes_or_no
+from utils import get_instument,get_objects_dict,print_colored, TextColor, get_data_persistence_status, executor, get_yes_or_no
 from new_dataset_backend import new_dataset_info_collector
 from provenance_backend import provenance_info_collector, update_yaml, provenance_checker
 from get_workflow import get_workflow
 from remote_dataset import remote_dataset
 
+EXECUTION_PATH = None
+SERVICE_PATH = None
+CLEAN_UP_FILES = set()
 
-# User-guidelines:
-# (1) If path to folder is given, then the path should end with '/'
-# (2) It does not works if there is any path given inside the program as it can't map the path
+# remote_dataset and new_dataset are put inside the crate, ro-crate-info.yaml is in the cwd,
+# files are copied and removed from cwd(), APP-REQ pasted inside the execution path
+# log created inside EXECUTIPN_PATH/log
+
+def interrupt_handler(signal, frame): # signal handler for cleaning up in case of an interrupt
+    print_colored("Reproducibility Service has been interrupted.", TextColor.RED)
+    if len(CLEAN_UP_FILES)>0:
+        try:
+            print("Cleaning up the execution directory...")
+            cleanup(CLEAN_UP_FILES)
+        except Exception as e:
+            print_colored(e, TextColor.RED)
+            print_colored("Failed to clean up the execution directory.", TextColor.RED)
+
+    print_colored("Exiting the program.", TextColor.RED)
+    sys.exit(0)
+
+signal.signal(signal.SIGINT, interrupt_handler) # register the signal handler
+
 
 class ReproducibilityService:
-    def __init__(self, root_folder, provenance_flag:bool, new_dataset_flag:bool):
+    def __init__(self, provenance_flag:bool, new_dataset_flag:bool):
         self.provenance_flag = provenance_flag
         self.new_dataset_flag = new_dataset_flag
-        self.root_folder = root_folder
-        self.workflow_folder = os.path.join(root_folder, 'Workflow')
+        self.root_folder = SERVICE_PATH
+        self.workflow_folder = os.path.join(EXECUTION_PATH, 'Workflow')
+        self.remote_dataset_flag = False
 
         if len(os.listdir(self.workflow_folder)) == 0:
             print_colored("ERROR| No crate found in the workflow folder.", TextColor.RED)
@@ -44,7 +64,7 @@ class ReproducibilityService:
                 instrument= get_instument(crate)
                 objects= get_objects_dict(crate)
                 # download the remote data-set if it exists and return true if it exists
-                (self.remote_dataset_flag, remote_dataset_dict) = remote_dataset(crate)
+                (self.remote_dataset_flag, remote_dataset_dict) = remote_dataset(crate, self.crate_directory)
                 files_verifier(self.crate_directory, instrument, objects, remote_dataset_dict)
             if provenance_flag: #update the sorces inside the yaml file
                 update_yaml(self.crate_directory)
@@ -53,8 +73,7 @@ class ReproducibilityService:
             print_colored(e,TextColor.RED)
             sys.exit(1)
 
-        self.log_folder = os.path.join(root_folder, 'log')
-        self.log_file = os.path.join(self.log_folder, 'reproducability.log')
+        self.log_folder = os.path.join(EXECUTION_PATH, 'log')
 
     def run(self):
        initial_files = set(os.listdir(os.getcwd()))
@@ -64,25 +83,31 @@ class ReproducibilityService:
            new_command.insert(1, "--provenance")
        # for debugging: new_command.insert(1, "-d")
        # run the new command
-       temp = dataset_mover_and_application_mover(self.crate_directory)
+       global CLEAN_UP_FILES
+       CLEAN_UP_FILES = dataset_mover_and_application_mover(self.crate_directory)
        if self.remote_dataset_flag:
-           temp = temp.union(remote_dataset_mover(os.getcwd()))
-       result = executor(new_command)
-       move_results_created(initial_files,temp)
+           CLEAN_UP_FILES = CLEAN_UP_FILES.union(remote_dataset_mover(self.crate_directory))
+       result = executor(new_command,EXECUTION_PATH)
+       move_results_created(initial_files,CLEAN_UP_FILES, EXECUTION_PATH)
        return result
 
 if __name__ == "__main__":
 
+    SERVICE_PATH= os.path.dirname(os.path.abspath(__file__))
+    print("Service path is:",SERVICE_PATH)
+    EXECUTION_PATH = create_new_execution_directory(SERVICE_PATH)
+    print("Execution path is:",EXECUTION_PATH)
+
     try:
-        get_workflow()
+        get_workflow(EXECUTION_PATH)
     except Exception as e:
         print_colored(e,TextColor.RED)
         sys.exit(1)
 
     new_dataset_flag = get_yes_or_no("Do you want to reproduce the crate on a new dataset?")
-    provenance_flag = provenance_info_collector()
+    provenance_flag = provenance_info_collector(EXECUTION_PATH)
 
-    rs = ReproducibilityService(os.getcwd(),provenance_flag, new_dataset_flag)
+    rs = ReproducibilityService(provenance_flag, new_dataset_flag)
     result = rs.run()
     if result:
         print_colored("Reproducibility Service has been executed successfully", TextColor.GREEN)
@@ -90,6 +115,6 @@ if __name__ == "__main__":
         print_colored("Reproducibility Service has been failed", TextColor.RED)
 
     if provenance_flag:
-       provenance_checker()
+       provenance_checker(EXECUTION_PATH)
 
     sys.exit(0)

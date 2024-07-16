@@ -33,12 +33,13 @@ def generate_command_line(self) -> list[str]:
 
     remote_dataset_hashmap = {}
     if self.remote_dataset_flag:
-        remote_dataset_hashmap = addr_extractor(os.path.join(os.getcwd(), "remote_dataset"))
-
+        print(os.path.join(path, "remote_dataset"))
+        remote_dataset_hashmap = addr_extractor(os.path.join(path, "remote_dataset"))
+    print(remote_dataset_hashmap)
     if not self.new_dataset_flag:
         dataset_hashmap = addr_extractor(os.path.join(path, "dataset"))
     else:
-        dataset_hashmap = addr_extractor(os.path.join(os.getcwd(), "new_dataset"))
+        dataset_hashmap = addr_extractor(os.path.join(path, "new_dataset"))
 
     application_sources_hashmap = addr_extractor(os.path.join(path, "application_sources"))
 

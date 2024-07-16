@@ -128,7 +128,7 @@ def address_converter(path: str, addr: str, dataset_hashmap: dict,
     errors = []
 
     if dataset_flags[1]:
-        dataset_path = os.path.join(os.getcwd(), "new_dataset")
+        dataset_path = os.path.join(path, "new_dataset")
     else:
         dataset_path = os.path.join(path, "dataset")
     application_sources_path = os.path.join(path, "application_sources")
@@ -140,7 +140,7 @@ def address_converter(path: str, addr: str, dataset_hashmap: dict,
     ]
 
     if dataset_flags[0]:
-        paths_to_try.insert(0,(os.path.join(os.getcwd(), "remote_dataset"), remote_dataset_hashmap, "Remote Dataset Error"))
+        paths_to_try.insert(0,(os.path.join(path, "remote_dataset"), remote_dataset_hashmap, "Remote Dataset Error"))
 
     for path, hashmap, error_context in paths_to_try: # try all the paths one by one and return where
         try:                                           # file is found,if not found append the error to the list

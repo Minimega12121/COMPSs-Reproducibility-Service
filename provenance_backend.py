@@ -40,13 +40,13 @@ def update_yaml(crate_path: str):
     # Create a YAML instance
     yaml = YAML()
     yaml.preserve_quotes = True
-    yaml_file_path = './ro-crate-info.yaml'
+    yaml_file_path = os.path.join(os.getcwd(), "ro-crate-info.yaml")
     # Read the YAML content from the file
     with open(yaml_file_path, 'r', encoding='utf-8') as file:
         data = yaml.load(file)
 
     # Update the name and description fields
-     # Update the fields in the loaded YAML content
+    # Update the fields in the loaded YAML content
     data['COMPSs Workflow Information']['sources'] = sources
     data['COMPSs Workflow Information']['sources_main_file'] = sources_main_file
     data['COMPSs Workflow Information']['name'] = name
@@ -58,7 +58,7 @@ def update_yaml(crate_path: str):
 
     print("YAML file updated successfully.")
 
-def provenance_info_collector() -> bool:
+def provenance_info_collector(execution_path:str) -> bool:
     """
     Collect provenance information for the workflow based on user input.
 
@@ -74,46 +74,40 @@ def provenance_info_collector() -> bool:
     provenance_flag = get_yes_or_no("Do you want to see the provenance of the workflow?")
     print("Provenance_flag:",provenance_flag)
     if provenance_flag:
-        current_dir = os.getcwd()
-        files = os.listdir(current_dir)
+        files = os.listdir(os.getcwd())
         already_exists = "ro-crate-info.yaml" in files
-        time.sleep(1)
-        if not already_exists :
-            get_ro_crate_info()
-            print("Please fill the ro-crate-info.yaml file, generated inside the current working directory.")
-            time.sleep(1)
+        if not already_exists:
+            get_ro_crate_info(execution_path)
+            print(f"Please fill the ro-crate-info.yaml file, generated inside the current working directory. {os.path.join(os.getcwd(),'ro-crate-info.yaml')}")
             check = False
             while not check:
-                time.sleep(1)
                 check = get_yes_or_no("Have you filled the ro-crate-info.yaml file for provenance generation?")
         else:
             print("ro-crate-info.yaml file already exists in the current working directory.")
             check = get_yes_or_no("Please check if the already existing ro-crate-info.yaml file is correctly filled for provenance generation")
-
             if not check:
-                get_ro_crate_info()
-                time.sleep(1)
+                get_ro_crate_info(execution_path)
                 print("Please fill the new ro-crate-info.yaml file, generated inside the current working directory.")
                 check = False
                 while not check:
-                    time.sleep(1)
                     check = get_yes_or_no("Have you filled the ro-crate-info.yaml file for provenance generation?")
 
         print("Considering the filled information for provenance generation.")
 
     return provenance_flag
 
-def provenance_checker() :
-    for file in os.listdir(os.getcwd()):
-        if file == "ro-crate-info.yaml":
-            os.unlink(os.path.join(os.getcwd(), file))
-            break
-    if not os.path.exists('Result'):
+def provenance_checker(execution_path: str) :
+    # for file in os.listdir(os.getcwd()):
+    #     if file == "ro-crate-info.yaml":
+    #         os.unlink(os.path.join(os.getcwd(), file))
+    #         break
+    result_path = os.path.join(execution_path, 'Result')
+    if not os.path.exists(result_path):
         contains_crate = False
     else:
-        contains_crate = any(name.startswith('COMPSs_RO-Crate_') for name in os.listdir(f'Result/') if os.path.isdir(os.path.join('Result/', name)))
+        contains_crate = any(name.startswith('COMPSs_RO-Crate_') for name in os.listdir(result_path) if os.path.isdir(os.path.join(result_path, name)))
 
     if contains_crate:
-        print_colored("RO_CRATE has been generated successfully inside 'Result/'", TextColor.GREEN)
+        print_colored(f"RO_CRATE has been generated successfully inside {result_path}", TextColor.GREEN)
     else:
         print_colored("Could not generate the RO_CRATE for provenance, please see the above provenance log for more details", TextColor.RED)

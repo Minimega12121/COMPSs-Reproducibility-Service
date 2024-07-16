@@ -5,8 +5,8 @@ import urllib.parse
 # Works/workflow-838-1.crate.zip
 from utils import print_colored, TextColor, executor, get_yes_or_no
 
-def get_workflow():
-    workflow_path = "./Workflow"
+def get_workflow(execution_path: str):
+    workflow_path = os.path.join(execution_path, "Workflow")
     if len(os.listdir(workflow_path)) == 1:
         flag = get_yes_or_no(f"There already exists a workflow './Workflow/{os.listdir(workflow_path)[0]}'. Do you want to use it(y) or give another workflow(n)? (yes/no):")
         if not flag:
@@ -22,16 +22,19 @@ def get_workflow():
     workflow_source = input("Do you have the workflow at a path or a WorkflowHub link? Enter 'path' or 'link': ").strip().lower()
 
     if workflow_source == 'path':
-        print_colored("Warning: Please ensure this is the path to the zip file not the extracted crate", TextColor.RED)
-        crate_path = input("Please enter the path to the zip file containing the RO-crate: ").strip()
+        print_colored("Warning: Please ensure this is the path to a zip file or a directory", TextColor.RED)
+        crate_path = input("Please enter the path to the the RO-crate: ").strip()
 
-        if not os.path.isfile(crate_path):
-            raise FileNotFoundError(f"The file at path {crate_path} was not found.")
+        # if not os.path.isfile(crate_path):
+        #     raise FileNotFoundError(f"The file at path {crate_path} was not found.")
 
-        if not zipfile.is_zipfile(crate_path):
-            raise ValueError(f"The file at path {crate_path} is not a valid zip file.")
-
-        shutil.copy(crate_path, os.path.join(workflow_path, "my_crate.zip"))
+        if zipfile.is_zipfile(crate_path):
+            shutil.copy(crate_path, os.path.join(workflow_path, "my_crate.zip"))
+        elif os.path.isdir(crate_path): # if a directory then just copy the whole directory into the destination and exit the function
+            shutil.copytree(crate_path, os.path.join(workflow_path, "crate"))
+            return
+        else:
+            raise ValueError(f"The file at path {crate_path} is not a valid")
 
     elif workflow_source == 'link':
         print_colored("Warning: Please try using the wget command to ensure the link works before submitting the link here.",TextColor.RED)
@@ -41,7 +44,7 @@ def get_workflow():
         if not urllib.parse.urlparse(crate_link).scheme in ['http', 'https']:
             raise ValueError("The link provided is not a valid URL.")
 
-        executor(["wget", "-O", os.path.join(workflow_path, "my_crate.zip"), crate_link])
+        executor(["wget", "-O", os.path.join(workflow_path, "my_crate.zip"), crate_link], execution_path)
 
     else:
         raise ValueError("Invalid input. Please enter 'path' or 'link'.")
@@ -56,4 +59,4 @@ def get_workflow():
     finally:
         os.remove(crate_zip_path)
 
-    print("The workflow has been successfully extracted to './Workflow/'.")
+    print(f"The workflow has been successfully extracted to {workflow_path}")

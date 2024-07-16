@@ -1,1 +1,0 @@
-runcompss --lang=python -p src/wordcount_merge.py /home/archit/Desktop/tutorial_apps/python/wordcount_merge/data/
