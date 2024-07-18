@@ -121,6 +121,7 @@ if __name__ == "__main__":
     provenance_flag = provenance_info_collector(EXECUTION_PATH)
 
     rs = ReproducibilityService(provenance_flag, new_dataset_flag)
+    os.chdir(EXECUTION_PATH)
     result = rs.run()
     if result:
         print_colored("Reproducibility Service has been executed successfully", TextColor.GREEN)
