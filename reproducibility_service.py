@@ -90,7 +90,7 @@ class ReproducibilityService:
                 CLEAN_UP_FILES = CLEAN_UP_FILES.union(remote_dataset_mover(self.crate_directory))
 
             new_command = get_more_flags(new_command) # ask user for more flags he/she wants to add to the final compss command
-            
+
             new_command = get_change_values(new_command)
 
             result = executor(new_command,EXECUTION_PATH)
@@ -110,6 +110,7 @@ if __name__ == "__main__":
     print("Service path is:",SERVICE_PATH)
     EXECUTION_PATH = create_new_execution_directory(SERVICE_PATH)
     print("Execution path is:",EXECUTION_PATH)
+    os.chdir(EXECUTION_PATH)
 
     try:
         get_workflow(EXECUTION_PATH)
@@ -121,7 +122,6 @@ if __name__ == "__main__":
     provenance_flag = provenance_info_collector(EXECUTION_PATH)
 
     rs = ReproducibilityService(provenance_flag, new_dataset_flag)
-    os.chdir(EXECUTION_PATH)
     result = rs.run()
     if result:
         print_colored("Reproducibility Service has been executed successfully", TextColor.GREEN)
