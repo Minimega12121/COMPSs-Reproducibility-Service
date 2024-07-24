@@ -66,6 +66,12 @@ def get_objects_dict(entity:ROCrate):
         objects[input["name"]] = input.id
     return objects
 
+
+def get_compss_crate_version(crate_path: str) -> float:
+    crate = ROCrate(crate_path)
+    compss_object = get_by_id(crate,"#compss")
+    return float(compss_object["version"])
+
 def get_yes_or_no(msg :str) :
     while True:
         user_input = input(f"{msg} (y/n):").lower()
@@ -204,6 +210,25 @@ def download_file(url: str , download_path: str, file_name: str):
     urllib.request.urlretrieve(url, full_path)
 
     print(f"File downloaded as {full_path}")
+
+def check_compss_version()-> float:
+    try:
+        # Execute the command
+        result = subprocess.run(['runcompss', '-v'], capture_output=True, text=True, check=True)
+
+        # Parse the output
+        output = result.stdout.strip()
+        if "COMPSs version" in output:
+            version = float(output.split('COMPSs version ')[1].split(" ")[0])
+            print(f"COMPSs Version Found :{version}")
+            return version
+        else:
+            return "COMPSs version not found in the output."
+
+    except subprocess.CalledProcessError as e:
+        return f"An error occurred while trying to get COMPSs version: {e}"
+    except FileNotFoundError:
+        return "runcompss command not found. Please ensure that COMPSs is installed and the command is available in your PATH."
 
 
 

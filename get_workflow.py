@@ -69,18 +69,12 @@ def get_more_flags(command: list[str]) -> list[str]:
     if not more: # return if no more flags are needed
         return command
 
-    try:
-        n = int(input("How many flags do you want to add? Enter the number: ")) #raise value error if not an integer
-    except ValueError:
-        print("Invalid input. Please enter a valid integer.")
-        return None
 
-    flags = []
-    for i in range(n):
-        flags.append(input(f"Enter flag {i+1}: ").strip())
-
-    for flag in flags:
-        command.insert(1, flag)
+    print_colored("WARNING: Submit the flags in one go. Example) Please enter the flags you want to add: --lang=python -d -p",TextColor.RED)
+    flag = input("Please enter the flags you want to add: ")
+    flags: list[str] = flag.split(" ")
+    for f in flags:
+        command.insert(1, f)
 
     return command
 

@@ -6,15 +6,16 @@ from rocrate.rocrate import ROCrate
 from repro_methods import generate_command_line
 from file_operations import move_results_created, dataset_mover_and_application_mover, cleanup,create_new_execution_directory, remote_dataset_mover
 from file_verifier import files_verifier
-from utils import get_instument,get_objects_dict,print_colored, TextColor, get_data_persistence_status, executor, get_yes_or_no
+from utils import get_instument,get_objects_dict,print_colored, TextColor, get_data_persistence_status, executor, get_yes_or_no, check_compss_version, get_compss_crate_version
 from new_dataset_backend import new_dataset_info_collector
 from provenance_backend import provenance_info_collector, update_yaml, provenance_checker
 from get_workflow import get_workflow, get_more_flags, get_change_values
 from remote_dataset import remote_dataset
 
-EXECUTION_PATH = None
-SERVICE_PATH = None
+EXECUTION_PATH:str = None
+SERVICE_PATH:str = None
 CLEAN_UP_FILES = set()
+COMPSS_VERSION:float = None
 
 # remote_dataset and new_dataset are put inside the crate, ro-crate-info.yaml is in the cwd,
 # files are copied and removed from cwd(), APP-REQ pasted inside the execution path
@@ -50,6 +51,13 @@ class ReproducibilityService:
 
         # Get the first directory in the Workflow folder {Assuming only crate is inside the workflow folder}
         self.crate_directory = os.path.join(self.workflow_folder, os.listdir(self.workflow_folder)[0])
+
+        crate_compss_version:float = get_compss_crate_version(self.crate_directory)
+        print(f"COMPSs VERSION USED INSIDE CRATE: {crate_compss_version}")
+        # not using currently to run 3.3.1,3.3 examples on a 3.3 or 3.3.1 compss machine
+        # if COMPSS_VERSION != crate_compss_version:
+        #     print_colored(f"ERROR| The crate was created with a different version of COMPSs ({get_compss_crate_version(self.crate_directory)}).", TextColor.RED)
+        #     sys.exit(1)
 
         try:
             if not get_data_persistence_status(self.crate_directory):
@@ -105,31 +113,33 @@ class ReproducibilityService:
 
 
 if __name__ == "__main__":
-
-    SERVICE_PATH= os.path.dirname(os.path.abspath(__file__))
-    print("Service path is:",SERVICE_PATH)
-    EXECUTION_PATH = create_new_execution_directory(SERVICE_PATH)
-    print("Execution path is:",EXECUTION_PATH)
-    os.chdir(EXECUTION_PATH)
-
     try:
+        COMPSS_VERSION:float = check_compss_version() # To check if compss is installed, if yes extract the version, else exit the program
+
+        SERVICE_PATH= os.path.dirname(os.path.abspath(__file__))
+        print("Service path is:",SERVICE_PATH)
+        EXECUTION_PATH = create_new_execution_directory(SERVICE_PATH)
+        print("Execution path is:",EXECUTION_PATH)
+        os.chdir(EXECUTION_PATH)
+
         get_workflow(EXECUTION_PATH)
+
+        new_dataset_flag = get_yes_or_no("Do you want to reproduce the crate on a new dataset?")
+        provenance_flag = provenance_info_collector(EXECUTION_PATH)
+
+        rs = ReproducibilityService(provenance_flag, new_dataset_flag)
+        result = rs.run()
+        if result:
+            print_colored("Reproducibility Service has been executed successfully", TextColor.GREEN)
+        else:
+            print_colored("Reproducibility Service has been failed", TextColor.RED)
+
+        if provenance_flag:
+            provenance_checker(EXECUTION_PATH)
+
     except Exception as e:
         print_colored(e,TextColor.RED)
         sys.exit(1)
-
-    new_dataset_flag = get_yes_or_no("Do you want to reproduce the crate on a new dataset?")
-    provenance_flag = provenance_info_collector(EXECUTION_PATH)
-
-    rs = ReproducibilityService(provenance_flag, new_dataset_flag)
-    result = rs.run()
-    if result:
-        print_colored("Reproducibility Service has been executed successfully", TextColor.GREEN)
-    else:
-        print_colored("Reproducibility Service has been failed", TextColor.RED)
-
-    if provenance_flag:
-       provenance_checker(EXECUTION_PATH)
 
     sys.exit(0)
 # remote_dataset_example: https://workflowhub.eu/workflows/1072/ro_crate?version=1
