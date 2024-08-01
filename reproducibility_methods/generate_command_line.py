@@ -48,10 +48,10 @@ def generate_command_line(self) -> list[str]:
     with open(compss_submission_command_path, 'r', encoding='utf-8') as file:
         compss_submission_command = next(file).strip()
 
-    command = command_line_generator(compss_submission_command, path,
+    new_command = command_line_generator(compss_submission_command, path,
                                      dataset_hashmap, application_sources_hashmap,remote_dataset_hashmap,dataset_flags)
 
-    return command
+    return new_command
 
 def command_line_generator(command: str, path: str, dataset_hashmap: dict,
                            application_sources_hashmap: dict, remote_dataset_hashmap: dict, dataset_flags: tuple[bool,bool]) -> list[str]:

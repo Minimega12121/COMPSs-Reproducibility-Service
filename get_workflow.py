@@ -5,25 +5,31 @@ import urllib.parse
 # Works/workflow-838-1.crate.zip
 from utils import print_colored,print_colored_ns, TextColor, executor, get_yes_or_no
 
-def get_workflow(execution_path: str):
+def get_workflow(execution_path: str, link_or_path: str) -> None:
     workflow_path = os.path.join(execution_path, "Workflow")
-    if len(os.listdir(workflow_path)) == 1:
-        flag = get_yes_or_no(f"There already exists a workflow './Workflow/{os.listdir(workflow_path)[0]}'. Do you want to use it(y) or give another workflow(n)? (yes/no):")
-        if not flag:
-            if os.path.isdir(os.path.join(workflow_path, os.listdir(workflow_path)[0])):
-                shutil.rmtree(os.path.join(workflow_path, os.listdir(workflow_path)[0]))
-            else:
-                os.unlink(os.path.join(workflow_path, os.listdir(workflow_path)[0]))
-        else:
-            return
-    elif len(os.listdir(workflow_path)) > 1:
-        raise ValueError("The directory './Workflow' contains multiple crates. Please ensure it is empty or contains one crate before running this script.")
+    # if len(os.listdir(workflow_path)) == 1:
+    #     flag = get_yes_or_no(f"There already exists a workflow './Workflow/{os.listdir(workflow_path)[0]}'. Do you want to use it(y) or give another workflow(n)? (yes/no):")
+    #     if not flag:
+    #         if os.path.isdir(os.path.join(workflow_path, os.listdir(workflow_path)[0])):
+    #             shutil.rmtree(os.path.join(workflow_path, os.listdir(workflow_path)[0]))
+    #         else:
+    #             os.unlink(os.path.join(workflow_path, os.listdir(workflow_path)[0]))
+    #     else:
+    #         return
+    # elif len(os.listdir(workflow_path)) > 1:
+    #     raise ValueError("The directory './Workflow' contains multiple crates. Please ensure it is empty or contains one crate before running this script.")
 
-    workflow_source = input("Do you have the workflow at a path or a WorkflowHub link? Enter 'path' or 'link': ").strip().lower()
+    workflow_source = None
+
+    if link_or_path.startswith("http"):
+        workflow_source = 'link'
+    else:
+        workflow_source = 'path'
 
     if workflow_source == 'path':
         print_colored("Warning: Please ensure this is the path to a zip file or a directory", TextColor.RED)
-        crate_path = input("Please enter the path to the the RO-crate: ").strip()
+        crate_path = link_or_path
+        print("The path to the crate is:", crate_path)
 
         # if not os.path.isfile(crate_path):
         #     raise FileNotFoundError(f"The file at path {crate_path} was not found.")
@@ -39,8 +45,8 @@ def get_workflow(execution_path: str):
     elif workflow_source == 'link':
         print_colored("Warning: Please try using the wget command to ensure the link works before submitting the link here.",TextColor.RED)
         print_colored("Example) wget -O my_crate.zip https://example.com/my_crate.zip", TextColor.RED)
-        crate_link = input("Please enter the WorkflowHub link to the RO-crate: ").strip()
-
+        crate_link = link_or_path
+        print("The link to download the crate is:", crate_link)
         if not urllib.parse.urlparse(crate_link).scheme in ['http', 'https']:
             raise ValueError("The link provided is not a valid URL.")
 
@@ -61,9 +67,11 @@ def get_workflow(execution_path: str):
 
     print(f"The workflow has been successfully extracted to {workflow_path}")
 
-def get_more_flags(command: list[str]) -> list[str]:
+def get_more_flags(command: list[str], previous_flags: list[str]) -> list[str]:
     print_colored("The current command is as follows:", TextColor.YELLOW)
     print_colored_ns(" ".join(command), TextColor.YELLOW)
+    previous_flags_str = " ".join(previous_flags)
+    print_colored(f"For Reference) The previously applied flags are as follows: {previous_flags_str}", TextColor.BLUE)
     more = get_yes_or_no("Do you want to add more flags to the compss runtime command shown above")
 
     if not more: # return if no more flags are needed

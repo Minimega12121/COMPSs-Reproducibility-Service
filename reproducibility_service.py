@@ -3,19 +3,23 @@ import sys
 import signal
 from rocrate.rocrate import ROCrate
 
-from repro_methods import generate_command_line
+from reproducibility_methods import generate_command_line
 from file_operations import move_results_created, dataset_mover_and_application_mover, cleanup,create_new_execution_directory, remote_dataset_mover
 from file_verifier import files_verifier
 from utils import get_instument,get_objects_dict,print_colored, TextColor, get_data_persistence_status, executor, get_yes_or_no, check_compss_version, get_compss_crate_version
+from utils import check_slurm_cluster, get_previous_flags
 from new_dataset_backend import new_dataset_info_collector
 from provenance_backend import provenance_info_collector, update_yaml, provenance_checker
 from get_workflow import get_workflow, get_more_flags, get_change_values
 from remote_dataset import remote_dataset
+from data_persistance_false import data_persistance_false_verifier, run_dpf
 
 EXECUTION_PATH:str = None
 SERVICE_PATH:str = None
 CLEAN_UP_FILES = set()
 COMPSS_VERSION:float = None
+BSC_CLUSTER:bool = None
+DPF: bool = False
 
 # remote_dataset and new_dataset are put inside the crate, ro-crate-info.yaml is in the cwd,
 # files are copied and removed from cwd(), APP-REQ pasted inside the execution path
@@ -38,7 +42,7 @@ signal.signal(signal.SIGINT, interrupt_handler) # register the signal handler
 
 
 class ReproducibilityService:
-    def __init__(self, provenance_flag:bool, new_dataset_flag:bool):
+    def __init__(self, provenance_flag:bool, new_dataset_flag:bool) -> bool:
         self.provenance_flag = provenance_flag
         self.new_dataset_flag = new_dataset_flag
         self.root_folder = SERVICE_PATH
@@ -55,14 +59,16 @@ class ReproducibilityService:
         crate_compss_version:float = get_compss_crate_version(self.crate_directory)
         print(f"COMPSs VERSION USED INSIDE CRATE: {crate_compss_version}")
         # not using currently to run 3.3.1,3.3 examples on a 3.3 or 3.3.1 compss machine
-        # if COMPSS_VERSION != crate_compss_version:
+        # if COMPSS_VERSION != crate_compss_version or get_data_persistence_status(self.crate_directory):
         #     print_colored(f"ERROR| The crate was created with a different version of COMPSs ({get_compss_crate_version(self.crate_directory)}).", TextColor.RED)
         #     sys.exit(1)
 
         try:
             if not get_data_persistence_status(self.crate_directory):
-                raise FileNotFoundError("ERROR| Data persistence is False in the crate, cannot reproduce such a workflow.")
-
+                data_persistance_false_verifier(self.crate_directory)
+                global DPF
+                DPF = True
+                return
 
             if new_dataset_flag:
                 new_dataset_info_collector(self.crate_directory)
@@ -76,6 +82,8 @@ class ReproducibilityService:
                 files_verifier(self.crate_directory, instrument, objects, remote_dataset_dict)
             if provenance_flag: #update the sorces inside the yaml file
                 update_yaml(self.crate_directory)
+
+
 
         except Exception as e:
             print_colored(e,TextColor.RED)
@@ -97,12 +105,14 @@ class ReproducibilityService:
             if self.remote_dataset_flag:
                 CLEAN_UP_FILES = CLEAN_UP_FILES.union(remote_dataset_mover(self.crate_directory))
 
-            new_command = get_more_flags(new_command) # ask user for more flags he/she wants to add to the final compss command
+            previous_flags = get_previous_flags(self.crate_directory)# get the previous flags to show the user as reference
+            new_command = get_more_flags(new_command, previous_flags) # ask user for more flags he/she wants to add to the final compss command
 
             new_command = get_change_values(new_command)
 
             result = executor(new_command,EXECUTION_PATH)
             move_results_created(initial_files,CLEAN_UP_FILES, EXECUTION_PATH)
+
             return result
 
         except Exception as e:
@@ -114,21 +124,33 @@ class ReproducibilityService:
 
 if __name__ == "__main__":
     try:
+        new_dataset_flag = False
+        provenance_flag = False
         COMPSS_VERSION:float = check_compss_version() # To check if compss is installed, if yes extract the version, else exit the program
-
+        BSC_CLUSTER = check_slurm_cluster()[0] # To check if the program is running on the BSC cluster
+        print("Bsc cluster:",BSC_CLUSTER)
         SERVICE_PATH= os.path.dirname(os.path.abspath(__file__))
         print("Service path is:",SERVICE_PATH)
         EXECUTION_PATH = create_new_execution_directory(SERVICE_PATH)
         print("Execution path is:",EXECUTION_PATH)
         os.chdir(EXECUTION_PATH)
 
-        get_workflow(EXECUTION_PATH)
+        link_or_path =  sys.argv[1] # take the link or path given by the user
+        get_workflow(EXECUTION_PATH, link_or_path )
 
-        new_dataset_flag = get_yes_or_no("Do you want to reproduce the crate on a new dataset?")
-        provenance_flag = provenance_info_collector(EXECUTION_PATH)
+        if not BSC_CLUSTER:
+            new_dataset_flag = get_yes_or_no("Do you want to reproduce the crate on a new dataset?")
+
+        if not BSC_CLUSTER:
+            provenance_flag = provenance_info_collector(EXECUTION_PATH)
 
         rs = ReproducibilityService(provenance_flag, new_dataset_flag)
-        result = rs.run()
+        result = False #default value
+        if DPF:
+            print(rs.crate_directory)
+            result = run_dpf(EXECUTION_PATH, rs.crate_directory)
+        else:
+            result = rs.run()
         if result:
             print_colored("Reproducibility Service has been executed successfully", TextColor.GREEN)
         else:
@@ -143,3 +165,4 @@ if __name__ == "__main__":
 
     sys.exit(0)
 # remote_dataset_example: https://workflowhub.eu/workflows/1072/ro_crate?version=1
+# to do: change execution path to sub-directory path

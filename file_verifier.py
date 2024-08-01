@@ -44,10 +44,10 @@ def files_verifier(crate_path: str, instrument: str, objects: dict, remote_datas
     # Verify the instrument file
     if not os.path.exists(instrument_path):
         verified = False
-        temp_size.append(instrument_path)
+        temp_path.append(instrument_path)
     if not os.path.getsize(instrument_path) == get_by_id(crate, instrument)["contentSize"]:
         size_verifier = False
-        temp_path.append(instrument_path)
+        temp_size.append(instrument_path)
 
     #Verify the objects/inputs
     crate = ROCrate(crate_path)

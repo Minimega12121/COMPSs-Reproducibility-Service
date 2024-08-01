@@ -54,6 +54,20 @@ def get_objects(entity:ROCrate):
         objects.append(val.id)
     return objects
 
+def get_results_dict(entity:ROCrate):
+    createAction = get_Create_Action(entity)
+    results= {}
+    if "result" in createAction: # It is not necessary to have inputs/objects in Create Action
+        temp = createAction["result"]
+    else:
+        return None
+
+    for result in temp:
+        results[result["name"]] = result.id
+    return results
+    ...
+
+
 def get_objects_dict(entity:ROCrate):
     createAction = get_Create_Action(entity)
     objects= {}
@@ -230,7 +244,28 @@ def check_compss_version()-> float:
     except FileNotFoundError:
         return "runcompss command not found. Please ensure that COMPSs is installed and the command is available in your PATH."
 
+def check_slurm_cluster() -> tuple[bool, str]:
+    try:
+        result = subprocess.run(['squeue'], capture_output=True, text=True)
+        if result.returncode == 0:
+            return True, result.stdout
+    except Exception as e:
+        return False, str(e)
 
+    return False, "squeue command failed without raising an exception"
+
+def get_previous_flags(crate_path: str) -> list[str]:
+    compss_submission_command_path = os.path.join(crate_path, "compss_submission_command_line.txt")
+
+    with open(compss_submission_command_path, 'r', encoding='utf-8') as file:
+        command = next(file).strip()
+    previous_flags = []
+    for cmd in command.split():
+        if cmd.startswith("--") or cmd.startswith("-"):
+            if not (cmd.startswith("--provenance") or cmd.startswith("-p")):
+                previous_flags.append(cmd)
+
+    return previous_flags
 
 
 

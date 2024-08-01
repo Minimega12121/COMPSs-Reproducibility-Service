@@ -149,6 +149,25 @@ def address_converter(path: str, addr: str, dataset_hashmap: dict,
             errors.append((error_context, e))
 
     handle_address_conversion_failure(addr, errors)
+def addr_extractor(path: str) -> dict:
+    """
+    Extracts the addresses of datasets in the given path. For this particular case,
+    it is used to extract the mapping of filenames in the crate/dataset and
+    crate/application_sources directories.
+
+    Args:
+        path (str): The path to the directory containing the datasets.
+
+    Returns:
+        dict: A dictionary mapping dataset filenames to a value of 1.
+    """
+    if not os.path.exists(path):
+        os.makedirs(path)
+    hash_map = {}
+    for filename in os.listdir(path):
+        hash_map[filename] = 1
+
+    return hash_map
 
 def handle_address_conversion_failure(addr, errors):
     error_messages = "\n".join(f"{context}: {err}" for context, err in errors)
