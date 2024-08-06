@@ -5,7 +5,7 @@ import subprocess
 import threading
 import time
 import urllib.request
-import datetime
+import zipfile
 
 from ruamel.yaml import YAML
 from rocrate.rocrate import ROCrate
@@ -51,7 +51,11 @@ def get_objects(entity:ROCrate):
         return None
 
     for val in temp:
-        objects.append(val.id)
+        if "hasPart" in val:
+            for has in val["hasPart"]:
+                objects.append(has.id)
+        else:
+            objects.append(val.id)
     return objects
 
 def get_results_dict(entity:ROCrate):
@@ -68,7 +72,7 @@ def get_results_dict(entity:ROCrate):
     ...
 
 
-def get_objects_dict(entity:ROCrate):
+def get_objects_dict(entity:ROCrate)->dict:
     createAction = get_Create_Action(entity)
     objects= {}
     if "object" in createAction: # It is not necessary to have inputs/objects in Create Action
@@ -77,14 +81,21 @@ def get_objects_dict(entity:ROCrate):
         return None
 
     for input in temp:
-        objects[input["name"]] = input.id
+        if "hasPart" in input: # if hasPart exists, it means it is a composite object
+            for has in input["hasPart"]:
+                objects[(has["name"],has.id)] = has.id
+        else:
+            objects[(input["name"],input.id)] = input.id # else it is just a single object
     return objects
+
+def key_exists_with_first_element(d, first_element):
+    return any(key[0] == first_element for key in d)
 
 
 def get_compss_crate_version(crate_path: str) -> float:
     crate = ROCrate(crate_path)
     compss_object = get_by_id(crate,"#compss")
-    return float(compss_object["version"])
+    return compss_object["version"]
 
 def get_yes_or_no(msg :str) :
     while True:
@@ -132,19 +143,19 @@ def get_name_and_description(crate_path: str) -> tuple[str, str]:
     # Extract name and description
     name = data['COMPSs Workflow Information'].get('name', '')
     description = data['COMPSs Workflow Information'].get('description', '')
+    authors = data['Authors']
 
-    return name, description
+    return name, description, authors
 
-def get_ro_crate_info(execution_path: str):
+def get_ro_crate_info(execution_path: str, service_path: str):
     """
     Copies a ro-crate-info.yaml files to the current working directory.
 
     """
-    source = os.path.join(execution_path,"APP-REQ/ro-crate-info.yaml")
+    source = os.path.join(service_path,"APP-REQ/ro-crate-info.yaml")
     # Get the current working directory
     cwd = os.getcwd()
     file_name = "ro-crate-info.yaml"
-
     # Construct the full destination path
     destination = os.path.join(cwd, file_name)
 
@@ -165,24 +176,23 @@ def executor(command: list[str], execution_path: str) :
     if not os.path.exists(log_dir):
         os.makedirs(log_dir)
 
-    # Create unique log file names
-    timestamp = time.strftime("%Y%m%d-%H%M%S")
-    stdout_log = os.path.join(log_dir, f"out_{timestamp}.log")
-    stderr_log = os.path.join(log_dir, f"err_{timestamp}.log")
+    # Define log file names
+    stdout_log = os.path.join(log_dir, "out.log")
+    stderr_log = os.path.join(log_dir, "err.log")
 
     # Start the subprocess
     process = subprocess.Popen(command, stdout=subprocess.PIPE, stderr=subprocess.PIPE, text=True)
 
     # Define functions to read and log output
     def read_stdout(pipe, log_file):
-        with open(log_file, 'w') as f:
+        with open(log_file, 'a') as f:
             for line in iter(pipe.readline, ''):
                 print(line.strip())
                 f.write(line)
         pipe.close()
 
     def read_stderr(pipe, log_file):
-        with open(log_file, 'w') as f:
+        with open(log_file, 'a') as f:
             for line in iter(pipe.readline, ''):
                 print(line.strip())
                 f.write(line)
@@ -222,8 +232,16 @@ def download_file(url: str , download_path: str, file_name: str):
 
     # Download the file and save it to the specified path
     urllib.request.urlretrieve(url, full_path)
-
     print(f"File downloaded as {full_path}")
+    # Check if the file is a zip file and extract it
+    if zipfile.is_zipfile(full_path):
+        with zipfile.ZipFile(full_path, 'r') as zip_ref:
+            zip_ref.extractall(download_path)
+        print(f"Extracted {file_name} in {download_path}")
+
+        # Remove the zip file after extraction
+        os.remove(full_path)
+        print(f"Removed the zip file {file_name}")
 
 def check_compss_version()-> float:
     try:

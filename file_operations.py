@@ -43,16 +43,8 @@ def move_results_created(initial_files, temp, execution_path: str):
     new_files = current_files - initial_files
 
     if new_files:
-        if not os.path.exists(result_folder_path): # Create the Result folder
+        if not os.path.exists(result_folder_path):
             os.makedirs(result_folder_path)
-        # else:    # no need after separating the subdirectory of execution-commit
-        #     # Clear the existing files in the Result folder
-        #     for filename in os.listdir(result_folder_path):
-        #         file_path = os.path.join(result_folder_path, filename)
-        #         if os.path.isfile(file_path):
-        #             os.unlink(file_path)
-        #         elif os.path.isdir(file_path):
-        #             shutil.rmtree(file_path)
         print(new_files)
         # Move the new files to the Result folder
         for new_file in new_files:
@@ -61,27 +53,6 @@ def move_results_created(initial_files, temp, execution_path: str):
             src_path = os.path.join(cwd, new_file)
             dest_path = os.path.join(result_folder_path, new_file)
             shutil.move(src_path, dest_path)
-
-def dataset_mover_and_application_mover(crate_directory) -> set[str]:
-    """
-    Copies all files from 'application_sources' and 'dataset' folders in the
-    crate directory to the current working directory. Can tackle some cases of h
-    ard-coded paths in the application.
-
-    Args:
-    crate_directory (str): Path to the RO-Crate directory.
-
-    Returns:
-    set: A set of names of the files and directories copied to the current working directory.
-    """
-    application_folder = os.path.join(crate_directory, "application_sources")
-    dataset_folder = os.path.join(crate_directory, "dataset")
-    input_files_copied = set()
-    input1 = copy_all_to_cwd(application_folder)
-    input2 = copy_all_to_cwd(dataset_folder)
-    input_files_copied = input1.union(input2)
-
-    return input_files_copied
 
 def remote_dataset_mover(directory: str) -> set[str]:
     """
@@ -97,6 +68,52 @@ def remote_dataset_mover(directory: str) -> set[str]:
     remote_dataset_folder = os.path.join(directory, "remote_dataset")
     return  copy_all_to_cwd(remote_dataset_folder)
 
+def dataset_mover_and_application_mover(crate_directory) -> set[str]:
+    """
+    Copies all files from 'application_sources' and 'dataset' folders in the
+    crate directory to the current working directory. Can tackle some cases of
+    hard-coded paths in the application.
+
+    Args:
+    crate_directory (str): Path to the RO-Crate directory.
+
+    Returns:
+    set: A set of names of the files copied to the current working directory.
+    """
+    application_folder = os.path.join(crate_directory, "application_sources")
+    dataset_folder = os.path.join(crate_directory, "dataset")
+    input_files_copied = set()
+    input1 = copy_all_files_to_cwd(application_folder)
+    input2 = copy_all_files_to_cwd(dataset_folder)
+    input_files_copied = input1.union(input2)
+
+    return input_files_copied
+
+def copy_all_files_to_cwd(src_path) -> set[str]:
+    """
+    Copies all files from the specified source path to the current working directory.
+
+    Parameters:
+    src_path (str): The path to the source directory containing files to be copied.
+
+    Returns:
+    Set[str]: A set of names of the files copied to the current working directory.
+    """
+    if not os.path.isdir(src_path):
+        print(f"The provided path '{src_path}' is not a valid directory.")
+        return set()
+
+    cwd = os.getcwd()
+    copied_files = set()
+
+    for item in os.listdir(src_path):
+        src_item_path = os.path.join(src_path, item)
+        if os.path.isfile(src_item_path):
+            dst_item_path = os.path.join(cwd, item)
+            shutil.copy2(src_item_path, dst_item_path)
+            copied_files.add(os.path.relpath(dst_item_path, cwd))
+
+    return copied_files
 
 def copy_all_to_cwd(src_path) -> set[str]:
     """
@@ -131,7 +148,6 @@ def copy_all_to_cwd(src_path) -> set[str]:
         dst_item_path = os.path.join(cwd, item)
         copy_item(src_item_path, dst_item_path)
 
-    print(f"{len(copied_items)} items copied to the current working directory.")
     return copied_items
 
 def cleanup(temp: set):
@@ -152,6 +168,4 @@ def create_new_execution_directory(SERVICE_PATH: str):
     # required directories for the service
     os.makedirs(os.path.join(new_execution_dir, 'log'))
     os.makedirs(os.path.join(new_execution_dir, 'Workflow'))
-    os.makedirs(os.path.join(new_execution_dir, 'APP-REQ'))
-    shutil.copy2(os.path.join(SERVICE_PATH,"APP-REQ/ro-crate-info.yaml"),os.path.join(new_execution_dir, 'APP-REQ/ro-crate-info.yaml'))
     return new_execution_dir

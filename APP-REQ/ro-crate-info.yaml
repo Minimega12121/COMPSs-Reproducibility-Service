@@ -8,7 +8,7 @@ COMPSs Workflow Information:
   # CURRENTLY ONLY DATA PERSISTENCE FALSE IS SUPPORTED BY THE RS SERVICE
   data_persistence: False
 
-# NOTE: PLEASE FILL THE AUTHORS AND SUBMITTER INFORMATION
+# NOTE: AUTHORS INFORMATION WILL BE EXTRACTED FROM THE CRATE
 Authors:
   - name: Author_1 Name
     e-mail: author_1@email.com
@@ -23,6 +23,7 @@ Authors:
     ror: https://ror.org/YYYYYYYYY
       # Find them in ror.org
 
+# NOTE: PLEASE FILL THE SUBMITTER INFORMATION
 Submitter:
   name: Name
   e-mail: submitter@email.com

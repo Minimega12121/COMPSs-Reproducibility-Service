@@ -13,7 +13,18 @@ so it must be declared as " runcompss /main.py "
 import os
 import shlex
 import re
+import subprocess
 from .address_mapper import address_converter, addr_extractor
+
+def check_slurm_cluster() -> tuple[bool, str]:
+    try:
+        result = subprocess.run(['squeue'], capture_output=True, text=True)
+        if result.returncode == 0:
+            return True, result.stdout
+    except Exception as e:
+        return False, str(e)
+
+    return False, "squeue command failed without raising an exception"
 
 def generate_command_line(self) -> list[str]:
     """
@@ -33,9 +44,8 @@ def generate_command_line(self) -> list[str]:
 
     remote_dataset_hashmap = {}
     if self.remote_dataset_flag:
-        print(os.path.join(path, "remote_dataset"))
         remote_dataset_hashmap = addr_extractor(os.path.join(path, "remote_dataset"))
-    print(remote_dataset_hashmap)
+
     if not self.new_dataset_flag:
         dataset_hashmap = addr_extractor(os.path.join(path, "dataset"))
     else:
@@ -114,7 +124,9 @@ def command_line_generator(command: str, path: str, dataset_hashmap: dict,
         new_command.append(values[p2][0])
         p2 += 1
 
-    if new_command and new_command[0] == "enqueue_compss": # Special case for enqueue_compss
+    if check_slurm_cluster()[0]:
+        new_command[0] = "enqueue_compss"
+    else:
         new_command[0] = "runcompss"
 
     return new_command

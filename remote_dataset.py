@@ -7,7 +7,6 @@ def remote_dataset(crate: ROCrate,crate_directory: str) -> bool:
 
     createAction = get_Create_Action(crate)
     remote_datasets= {}
-    print(createAction)
     if "object" in  createAction:
         temp = createAction["object"]
     else:

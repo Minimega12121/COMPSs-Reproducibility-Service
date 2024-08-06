@@ -36,9 +36,9 @@ def get_workflow(execution_path: str, link_or_path: str) -> None:
 
         if zipfile.is_zipfile(crate_path):
             shutil.copy(crate_path, os.path.join(workflow_path, "my_crate.zip"))
-        elif os.path.isdir(crate_path): # if a directory then just copy the whole directory into the destination and exit the function
-            shutil.copytree(crate_path, os.path.join(workflow_path, "crate"))
-            return
+        elif os.path.isdir(crate_path): # just return the orignal path in case of path given to not have storage issue
+            # shutil.copytree(crate_path, os.path.join(workflow_path, "crate"))
+            return crate_path
         else:
             raise ValueError(f"The file at path {crate_path} is not a valid")
 
@@ -59,7 +59,8 @@ def get_workflow(execution_path: str, link_or_path: str) -> None:
 
     try:
         with zipfile.ZipFile(crate_zip_path, 'r') as zip_ref:
-            zip_ref.extractall(os.path.join(workflow_path,"crate"))
+            zip_ref.extractall(workflow_path)
+        return workflow_path # returns crate path
     except zipfile.BadZipFile as e:
         raise ValueError(f"The file {crate_zip_path} is not a valid zip file or it is corrupted.")
     finally:
