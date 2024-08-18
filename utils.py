@@ -9,6 +9,7 @@ import zipfile
 
 from ruamel.yaml import YAML
 from rocrate.rocrate import ROCrate
+from tabulate import tabulate
 
 
 class TextColor:
@@ -23,6 +24,25 @@ def print_colored(text, color):
 
 def print_colored_ns(text, color):
     print(f"{color}{text}{TextColor.RESET}")
+
+def print_welcome_message():
+    welcome_text = """
+    ╔════════════════════════════════════════════════════╗
+    ║                                                    ║
+    ║          Welcome to COMPSS Reproducibility         ║
+    ║                 Service v1.0.0                     ║
+    ║                                                    ║
+    ║                COMPSS Version: 3.3.1               ║
+    ║                                                    ║
+    ║   Ensuring reproducibility in computational        ║
+    ║   workflows with precision and reliability.        ║
+    ║                                                    ║
+    ║   Let's make your computations reproducible!       ║
+    ║                                                    ║
+    ╚════════════════════════════════════════════════════╝
+    """
+    print_colored(welcome_text, TextColor.GREEN) # sleep for 1s for the user to see this
+    time.sleep(1)
 
 def get_by_id(entity:ROCrate, id:str):
     # Loop through all entities in the RO-Crate
@@ -69,7 +89,6 @@ def get_results_dict(entity:ROCrate):
     for result in temp:
         results[result["name"]] = result.id
     return results
-    ...
 
 
 def get_objects_dict(entity:ROCrate)->dict:
@@ -91,6 +110,12 @@ def get_objects_dict(entity:ROCrate)->dict:
 def key_exists_with_first_element(d, first_element):
     return any(key[0] == first_element for key in d)
 
+def get_file_names(folder_path: str) -> dict:
+    file_names = {}
+    for root, dirs, files in os.walk(folder_path):
+        for file in files:
+            file_names[file] = os.path.join(root, file)
+    return file_names
 
 def get_compss_crate_version(crate_path: str) -> float:
     crate = ROCrate(crate_path)
@@ -162,7 +187,7 @@ def get_ro_crate_info(execution_path: str, service_path: str):
     try:
         # Copy the file to the current working directory
         shutil.copy(source, destination)
-        print(f'ro-crate-info.yaml file copied to the current working directory.')
+        #print(f'ro-crate-info.yaml file copied to the current working directory.')
     except Exception as e:
         print(f'Error copying ro-crate-info.yaml file from {source}: {e}')
 
@@ -229,7 +254,7 @@ def download_file(url: str , download_path: str, file_name: str):
         os.makedirs(download_path)
     # Create the full path to the file
     full_path = os.path.join(download_path, file_name)
-
+    print_colored(f"Downloading {file_name} from {url} to {full_path}, please wait...", TextColor.YELLOW)
     # Download the file and save it to the specified path
     urllib.request.urlretrieve(url, full_path)
     print(f"File downloaded as {full_path}")
@@ -285,5 +310,33 @@ def get_previous_flags(crate_path: str) -> list[str]:
 
     return previous_flags
 
+# Function to convert status codes to symbols
+def get_status_symbol(file_exists, file_size_verified):
+    exists_symbol = "✅" if file_exists == 1 else "❌"
+    size_verified_symbol = "✅" if file_size_verified == 1 else "❌" if file_size_verified == 0 else "—"
+    return exists_symbol, size_verified_symbol
+
+# Function to wrap the file path based on a length limit
+def wrap_text(text, width):
+    return '\n'.join([text[i:i+width] for i in range(0, len(text), width)])
+
+# Function to generate the table
+def generate_file_status_table(file_status_list,Third_field:str, path_width_limit=30):
+    table = []
+
+    # Adding header row
+    table.append(["S.No.", "Filename", "File Path", Third_field , "File Size Verified"])
+
+    # Adding file status rows
+    for i, (filename, file_path, file_exists, file_size_verified) in enumerate(file_status_list, start=1):
+        exists_symbol, size_verified_symbol = get_status_symbol(file_exists, file_size_verified)
+
+        # Wrap the file path if it exceeds the specified width limit
+        wrapped_file_path = wrap_text(file_path, path_width_limit)
+
+        table.append([i, filename, wrapped_file_path, exists_symbol, size_verified_symbol])
+
+    # Print the table
+    print(tabulate(table, headers="firstrow", tablefmt="grid"))
 
 

@@ -52,12 +52,21 @@ def update_yaml(crate_path: str):
     data['COMPSs Workflow Information']['name'] = name
     data['COMPSs Workflow Information']['description'] = description
     data['Authors'] = authors
-    
+
+    # Ask for submitter details
+    print_colored("Please provide the submitter's detail for provenance generation: ", TextColor.YELLOW)
+    submitter_details = data['Submitter']
+    submitter_details['name'] = input("Submitter's Name [Name]: ").strip() or "Name"
+    submitter_details['e-mail'] = input("Submitter's E-mail [submitter@email.com]: ").strip() or "submitter@email.com"
+    submitter_details['orcid'] = input("Submitter's ORCID [https://orcid.org/XXXX-XXXX-XXXX-XXXX]: ").strip() or "https://orcid.org/XXXX-XXXX-XXXX-XXXX"
+    submitter_details['organisation_name'] = input("Submitter's Organisation Name [Submitter Institution name]: ").strip() or "Submitter Institution name"
+    submitter_details['ror'] = input("Submitter's ROR [https://ror.org/XXXXXXXXX]: ").strip() or "https://ror.org/XXXXXXXXX"
+
     # Write the updated dictionary back to the YAML file
     with open(yaml_file_path, 'w', encoding='utf-8') as file:
         yaml.dump(data, file)
 
-    print("YAML file updated successfully.")
+    print("Updated the ro-crate-info.yaml file with the workflow information.")
 
 def provenance_info_collector(execution_path:str, service_path: str) -> bool:
     """
@@ -79,21 +88,6 @@ def provenance_info_collector(execution_path:str, service_path: str) -> bool:
         already_exists = "ro-crate-info.yaml" in files
         if not already_exists:
             get_ro_crate_info(execution_path, service_path)
-            print_colored(f"Please fill the ro-crate-info.yaml file, generated inside the current working directory. {os.path.join(os.getcwd(),'ro-crate-info.yaml')}",TextColor.YELLOW)
-            check = False
-            while not check:
-                check = get_yes_or_no("Have you filled the ro-crate-info.yaml file for provenance generation?")
-        else:
-            print("ro-crate-info.yaml file already exists in the current working directory.")
-            check = get_yes_or_no("Please check if the already existing ro-crate-info.yaml file is correctly filled for provenance generation")
-            if not check:
-                get_ro_crate_info(execution_path, service_path)
-                print_colored(f"Please fill the ro-crate-info.yaml file, generated inside the current working directory. {os.path.join(os.getcwd(),'ro-crate-info.yaml')}",TextColor.YELLOW)
-                check = False
-                while not check:
-                    check = get_yes_or_no("Have you filled the ro-crate-info.yaml file for provenance generation?")
-
-        print("Considering the filled information for provenance generation.")
 
     return provenance_flag
 

@@ -1,5 +1,5 @@
 from utils import print_colored, TextColor, get_objects, get_by_id, get_instument, get_objects_dict, get_results_dict, check_slurm_cluster, executor, get_previous_flags
-
+from utils import get_file_names, get_by_id, generate_file_status_table
 from rocrate.rocrate import ROCrate
 from urllib.parse import urlparse
 from get_workflow import get_more_flags, get_change_values
@@ -26,6 +26,8 @@ def check_file_accessibility(crate: ROCrate) -> tuple[bool,dict]:
     accessibility = {}
     flag = True
     for path in file_paths:
+        if path.startswith("http"): # do not consider remote path for cluster due to no connection
+           continue
         parsed_url = urlparse(path)
         # Remove the 'file://<id>' prefix
         file_path = path.replace(f"file://{parsed_url.netloc}", "")
@@ -67,33 +69,39 @@ def files_verifier_dpf(crate_path: str):
     crate = ROCrate(crate_path)
     instrument_path = os.path.join(crate_path, instrument)
 
+    file_verifer = [] # tuple of (file_name, file_path, Date_modified ,file_size)
+    instrument_tuple = (instrument, instrument_path, 1, 1)
     if not os.path.getsize(instrument_path) == get_by_id(crate, instrument)["contentSize"]:
         size_verifier = False
         temp_size.append(instrument_path)
-
+        instrument_tuple = (instrument_tuple[0], instrument_tuple[1], instrument_tuple[2], 0)
+    file_verifer.append(instrument_tuple)
     #Verify the objects/inputs
     crate = ROCrate(crate_path)
     file_paths = get_objects(crate)
     for path in file_paths:
+        if path.startswith("http"): # do not consider remote path for cluster due to no connection
+           continue
+
         parsed_url = urlparse(path)
         # Remove the 'file://<id>' prefix
         file_path = path.replace(f"file://{parsed_url.netloc}", "")
 
         file_object = get_by_id(crate, path)
-
+        file_tuple = (path, file_path, 1, 2)
         if "contentSize" in file_object:
-            content_size = file_object["contentSize"]
-            # Verify the above content size with the actual file size
-
+            content_size = file_object["contentSize"] # Verify the above content size with the actual file size
             # Get the actual file size
             actual_size = os.path.getsize(file_path)
 
             # Verify the content size with the actual file size
             if actual_size != content_size:
+                file_tuple = (file_tuple[0], file_tuple[1], file_tuple[2], 0)
                 print(f"Size of {file_path} is incorrect")
                 size_verifier = False
                 temp_size.append(file_path)
             else:
+                file_tuple = (file_tuple[0], file_tuple[1], file_tuple[2], 1)
                 print(f"Size of {file_path} is correct")
 
         actual_modified_date = dt.datetime.utcfromtimestamp(os.path.getmtime(file_path)).replace(microsecond=0).isoformat()
@@ -101,9 +109,14 @@ def files_verifier_dpf(crate_path: str):
             print(f"DateModified of {file_path} is incorrect\n")
             date_verifier = False
             temp_date.append(file_path)
-        else:
-            print(f"DateModified of {file_path} is correct")
+            file_tuple = (file_tuple[0], file_tuple[1], 0, file_tuple[3])
+        # else:
+        #     print(f"DateModified of {file_path} is correct")
+        file_verifer.append(file_tuple)
 
+    print_colored("STATUS TABLE:", TextColor.YELLOW)
+
+    generate_file_status_table(file_verifer, "Date_Modified")
     if date_verifier:
         print_colored("All files have correct dateModified", TextColor.GREEN)
 
@@ -213,9 +226,8 @@ def address_converter_backend(path: str, addr: str, dataset_hashmap: dict) -> st
         if not os.path.exists(mapped_addr):
             return None
 
-
     return mapped_addr
-                
+
 def address_mapper_dpf(addr:str, object_list, result_list, application_sources_hash_map: dict, path:str) -> str:
     filename = None
     mapped_addr = None
@@ -239,7 +251,6 @@ def address_mapper_dpf(addr:str, object_list, result_list, application_sources_h
         addr_list = addr.split("/")
         filename = addr_list.pop()
 
-    print("Addr list is:",addr_list)
     matched_len = -1
     result_flag = False
 
@@ -266,7 +277,6 @@ def address_mapper_dpf(addr:str, object_list, result_list, application_sources_h
 
         for ls in object_list:
             if addr_list[i] in ls:
-                print(ls)
                 temp_addr =""
                 j= len(ls)-1
                 while j>=0 and ls[j] != addr_list[i]:
@@ -286,8 +296,7 @@ def address_mapper_dpf(addr:str, object_list, result_list, application_sources_h
 
         if len_matched_object==0 and len_matched_result ==0:
             continue
-        print("length matched result is:",len_matched_result)
-        print("length matched object is:",len_matched_object)
+
         if len_matched_result>len_matched_object:# Assigning the one with more common path
             if len_matched_result>matched_len:
                 matched_len = len_matched_result
@@ -304,7 +313,6 @@ def address_mapper_dpf(addr:str, object_list, result_list, application_sources_h
         os.makedirs(os.path.join(RESULT_PATH,f"new_output_{OUTPUT_NUM}"), exist_ok=True)
         mapped_addr = os.path.join(RESULT_PATH,f"new_output_{OUTPUT_NUM}")
         OUTPUT_NUM+=1
-        print(mapped_addr)
         return mapped_addr
     # If the address is a file, append the filename and check if exists
     if mapped_addr and filename:
@@ -317,17 +325,9 @@ def address_mapper_dpf(addr:str, object_list, result_list, application_sources_h
 
     #Could not find such directory or file
     if not mapped_addr:
-        # print all above varibles for debugging
-        print("Address is:"+addr)
-        print("Object list is:",object_list)
-        print("Result list is:",result_list)
-        print("Application sources hashmap is:",application_sources_hash_map)
-
         raise FileNotFoundError(f"Could not find the mapped address for: {addr}")
 
     mapped_addr = "/"+mapped_addr # since in dpf path is always absolute and starts with /
-    print("Mapped addr is:"+mapped_addr)
-
     return mapped_addr
 
 def url_splitter(addr: str)-> list[str]:
@@ -376,23 +376,19 @@ def command_line_generator_dpf(command: str,path:str) -> list[str]:
     crate = ROCrate(path)
     objects = get_objects_dict(crate)
     results = get_results_dict(crate)
+    files_a = get_file_names(os.path.join(path, "application_sources"))
     application_sources_hashmap = addr_extractor(os.path.join(path, "application_sources"))
     result_list = []
     object_list = []
 
     for _,val in objects.items():
-        # print(val)
-        print(url_splitter(val))
         object_list.append(url_splitter(val))
 
     for _,val in results.items():
-        # print(val)
-        print(url_splitter(val))
         result_list.append(url_splitter(val))
 
     object_list = [item for item in object_list if item not in result_list]
-    print(object_list)
-    print(result_list)
+
     command = shlex.split(command)
     flags = []
     paths = []
@@ -405,7 +401,22 @@ def command_line_generator_dpf(command: str,path:str) -> list[str]:
         elif re.compile(r'[/\\]').search(cmd): # Pattern for detecting paths
             paths.append((cmd, i))
         else:
-            values.append((cmd, i))
+            if cmd in files_a:
+                values.append((files_a[cmd], i))
+            else:# still to verify if the value is a file among the objects
+                possible = False
+                value = None
+                for _, id in objects.items():
+                    if get_by_id(crate,id)["name"] == cmd:
+                        possible = True
+                        parsed_url = urlparse(id)
+                         # Remove the 'file://<id>' prefix
+                        value = id.replace(f"file://{parsed_url.netloc}", "")
+                        break
+                if possible:
+                    values.append((value, i))
+                else: # else it is considered a value
+                    values.append((cmd, i))
 
     new_paths = []
 

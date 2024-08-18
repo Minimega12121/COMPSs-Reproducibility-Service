@@ -70,14 +70,13 @@ def get_workflow(execution_path: str, link_or_path: str) -> None:
 
 def get_more_flags(command: list[str], previous_flags: list[str]) -> list[str]:
     print_colored("The current command is as follows:", TextColor.YELLOW)
-    print_colored_ns(" ".join(command), TextColor.YELLOW)
+    print_colored(" ".join(command), TextColor.YELLOW)
     previous_flags_str = " ".join(previous_flags)
     print_colored(f"For Reference) The previously applied flags are as follows: {previous_flags_str}", TextColor.BLUE)
     more = get_yes_or_no("Do you want to add more flags to the compss runtime command shown above")
 
     if not more: # return if no more flags are needed
         return command
-
 
     print_colored("WARNING: Submit the flags in one go. Example) Please enter the flags you want to add: --lang=python -d -p",TextColor.RED)
     flag = input("Please enter the flags you want to add: ")

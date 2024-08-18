@@ -19,7 +19,7 @@ import os
 import shutil
 import datetime
 
-def move_results_created(initial_files, temp, execution_path: str):
+def move_results_created(initial_files, execution_path: str):
     """
     Removes temporary files and moves newly created files to a 'Result' folder.
 
@@ -31,13 +31,6 @@ def move_results_created(initial_files, temp, execution_path: str):
     result_folder_path = os.path.join(execution_path, 'Result')
     # Get the current list of files in the CWD and remove the clean-up files, that were copied for the execution
     cwd = os.getcwd()
-    for filename in temp:
-        file_path = os.path.join(cwd, filename)
-        if os.path.isfile(file_path):
-            os.unlink(file_path)
-        elif os.path.isdir(file_path):
-            shutil.rmtree(file_path)
-
     current_files = set(os.listdir(cwd))
     # Determine the new files by comparing current files with initial files
     new_files = current_files - initial_files
@@ -45,49 +38,50 @@ def move_results_created(initial_files, temp, execution_path: str):
     if new_files:
         if not os.path.exists(result_folder_path):
             os.makedirs(result_folder_path)
-        print(new_files)
         # Move the new files to the Result folder
         for new_file in new_files:
             if new_file.startswith("reproducibility_service_"): #cannot move the execution directory into iteself
+                continue
+            if new_file == "__pycache__": # Do not consider the cache files
                 continue
             src_path = os.path.join(cwd, new_file)
             dest_path = os.path.join(result_folder_path, new_file)
             shutil.move(src_path, dest_path)
 
-def remote_dataset_mover(directory: str) -> set[str]:
-    """
-    Copies all files from the 'remote_dataset' folder in the current working directory
-    to the current working directory.
+# def remote_dataset_mover(directory: str) -> set[str]:
+#     """
+#     Copies all files from the 'remote_dataset' folder in the current working directory
+#     to the current working directory.
 
-    Args:
-    directory (str): Path to the 'remote_dataset' directory.
+#     Args:
+#     directory (str): Path to the 'remote_dataset' directory.
 
-    Returns:
-    set: A set of names of the files and directories copied to the current working directory.
-    """
-    remote_dataset_folder = os.path.join(directory, "remote_dataset")
-    return  copy_all_to_cwd(remote_dataset_folder)
+#     Returns:
+#     set: A set of names of the files and directories copied to the current working directory.
+#     """
+#     remote_dataset_folder = os.path.join(directory, "remote_dataset")
+#     return  copy_all_to_cwd(remote_dataset_folder)
 
-def dataset_mover_and_application_mover(crate_directory) -> set[str]:
-    """
-    Copies all files from 'application_sources' and 'dataset' folders in the
-    crate directory to the current working directory. Can tackle some cases of
-    hard-coded paths in the application.
+# def dataset_mover_and_application_mover(crate_directory) -> set[str]:
+#     """
+#     Copies all files from 'application_sources' and 'dataset' folders in the
+#     crate directory to the current working directory. Can tackle some cases of
+#     hard-coded paths in the application.
 
-    Args:
-    crate_directory (str): Path to the RO-Crate directory.
+#     Args:
+#     crate_directory (str): Path to the RO-Crate directory.
 
-    Returns:
-    set: A set of names of the files copied to the current working directory.
-    """
-    application_folder = os.path.join(crate_directory, "application_sources")
-    dataset_folder = os.path.join(crate_directory, "dataset")
-    input_files_copied = set()
-    input1 = copy_all_files_to_cwd(application_folder)
-    input2 = copy_all_files_to_cwd(dataset_folder)
-    input_files_copied = input1.union(input2)
+#     Returns:
+#     set: A set of names of the files copied to the current working directory.
+#     """
+#     application_folder = os.path.join(crate_directory, "application_sources")
+#     dataset_folder = os.path.join(crate_directory, "dataset")
+#     input_files_copied = set()
+#     input1 = copy_all_files_to_cwd(application_folder)
+#     input2 = copy_all_files_to_cwd(dataset_folder)
+#     input_files_copied = input1.union(input2)
 
-    return input_files_copied
+#     return input_files_copied
 
 def copy_all_files_to_cwd(src_path) -> set[str]:
     """
@@ -150,14 +144,14 @@ def copy_all_to_cwd(src_path) -> set[str]:
 
     return copied_items
 
-def cleanup(temp: set):
-    cwd = os.getcwd()
-    for filename in temp:
-        file_path = os.path.join(cwd, filename)
-        if os.path.isfile(file_path):
-            os.unlink(file_path)
-        elif os.path.isdir(file_path):
-            shutil.rmtree(file_path)
+# def cleanup(temp: set):
+#     cwd = os.getcwd()
+#     for filename in temp:
+#         file_path = os.path.join(cwd, filename)
+#         if os.path.isfile(file_path):
+#             os.unlink(file_path)
+#         elif os.path.isdir(file_path):
+#             shutil.rmtree(file_path)
 
 def create_new_execution_directory(SERVICE_PATH: str):
     # Create a unique sub-directory name based on the current timestamp

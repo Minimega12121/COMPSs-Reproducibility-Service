@@ -48,6 +48,10 @@ def addr_extractor(path: str) -> dict:
 
     return hash_map
 
+# TO-DO:
+# change address converter backend such that if a file/directory matches with
+# any result object then mak a new folder with same name if directory inside the Results/ and map it there
+# else it is assumed to be a application source or a dataset file/dir
 def address_converter_backend(path: str, addr: str, dataset_hashmap: dict) -> str:
     """
     Converts the given address to a mapped address inside the RO_Crate

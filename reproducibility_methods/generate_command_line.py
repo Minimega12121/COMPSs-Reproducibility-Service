@@ -15,6 +15,7 @@ import shlex
 import re
 import subprocess
 from .address_mapper import address_converter, addr_extractor
+from rocrate.rocrate import ROCrate
 
 def check_slurm_cluster() -> tuple[bool, str]:
     try:
@@ -26,7 +27,7 @@ def check_slurm_cluster() -> tuple[bool, str]:
 
     return False, "squeue command failed without raising an exception"
 
-def generate_command_line(self) -> list[str]:
+def generate_command_line(self, sub_directory_path:str) -> list[str]:
     """
     Generates a modified command line based on the contents of a compss_submission_command_line.txt
     file and the mappings of dataset and application sources in the crate directory.
@@ -59,12 +60,64 @@ def generate_command_line(self) -> list[str]:
         compss_submission_command = next(file).strip()
 
     new_command = command_line_generator(compss_submission_command, path,
-                                     dataset_hashmap, application_sources_hashmap,remote_dataset_hashmap,dataset_flags)
+                                     dataset_hashmap, application_sources_hashmap,remote_dataset_hashmap,dataset_flags,self.remote_dataset_flag, sub_directory_path)
 
     return new_command
 
+def get_Create_Action(entity:ROCrate):
+    # Loop through all entities in the RO-Crate
+    for entity in entity.get_entities():
+        if entity.type == "CreateAction":
+            return entity
+    return None
+
+def get_results_dict(entity:ROCrate):
+    createAction = get_Create_Action(entity)
+    results= {}
+    if "result" in createAction: # It is not necessary to have inputs/objects in Create Action
+        temp = createAction["result"]
+    else:
+        return None
+
+    for result in temp:
+        results[result["name"]] = result.id
+    return results
+
+def commonsuffix(path1:str,path2:str):
+    paths = [path1, path2]
+    # Reverse the strings in the list to use os.path.commonprefix on the reversed strings
+    reversed_paths = [os.path.dirname(path)[::-1] for path in paths]
+    # Find the common prefix of the reversed strings
+    reversed_common_prefix = os.path.commonprefix(reversed_paths)
+    # Reverse the common prefix back to get the common suffix
+    path1 = path1.split("/")
+    is_possible = reversed_common_prefix[::-1] in path1 # check if the commaon dir
+    if is_possible:
+        return os.path.basename(reversed_common_prefix[::-1])
+    else:
+        return None
+
+def is_result(filepath:str,results_dict:dict, sub_directory_path:str)->str:
+
+    result_path = os.path.join(sub_directory_path, "Result")
+    if not os.path.exists(result_path):
+        os.mkdir(result_path)
+    if os.path.basename(filepath): #if the path is a file
+        if os.path.basename(filepath) in results_dict: #if it is a result
+            return os.path.join(result_path,os.path.basename(filepath))
+    else: # if path is a directory
+        for _,id in results_dict.items():
+            if commonsuffix(filepath,id):
+                #print("Result is possible for ",filepath,id)
+                is_possible_result = commonsuffix(filepath,id)
+                if not os.path.exists(os.path.join(result_path,is_possible_result)):
+                    os.mkdir(os.path.join(result_path,is_possible_result))
+                return os.path.join(result_path,is_possible_result)
+
+    return None # if it is not a result
+
 def command_line_generator(command: str, path: str, dataset_hashmap: dict,
-                           application_sources_hashmap: dict, remote_dataset_hashmap: dict, dataset_flags: tuple[bool,bool]) -> list[str]:
+                           application_sources_hashmap: dict, remote_dataset_hashmap: dict, dataset_flags: tuple[bool,bool],remote_dataset_flag:bool, sub_directory_path:str) -> list[str]:
     """
     Generates a modified command line by replacing paths in the command with their
     mapped counterparts based on the dataset and application sources mappings.
@@ -84,6 +137,13 @@ def command_line_generator(command: str, path: str, dataset_hashmap: dict,
     paths = []
     values = []
 
+    files_a = get_file_names(os.path.join(path, "application_sources"))
+    files_d = get_file_names(os.path.join(path, "dataset"))
+    files_r  = get_file_names(os.path.join(path, "remote_dataset"))
+
+    crate = ROCrate(path)
+    results_dict = get_results_dict(crate)
+
     for i, cmd in enumerate(command):
         if cmd.startswith("--") or cmd.startswith("-"):
             if not (cmd.startswith("--provenance") or cmd.startswith("-p")):
@@ -91,15 +151,33 @@ def command_line_generator(command: str, path: str, dataset_hashmap: dict,
         elif re.compile(r'[/\\]').search(cmd): # Pattern for detecting paths
             paths.append((cmd, i))
         else:
-            values.append((cmd, i))
+            if results_dict and cmd in results_dict:
+                result_path = os.path.join(sub_directory_path, "Result")
+                if not os.path.exists(result_path):
+                    os.mkdir(result_path)
+                values.append((os.path.join(result_path, cmd), i))
+            elif remote_dataset_flag and cmd in files_r:
+                values.append((files_r[cmd], i))
+            elif cmd in files_a:
+                values.append((files_a[cmd], i))
+            elif cmd in files_d:
+                values.append((files_d[cmd], i))
+            else:
+                values.append((cmd, i))
 
     new_paths = []
 
     for filepath in paths:
-        new_filepath = address_converter(path, filepath[0],dataset_hashmap,
-                                application_sources_hashmap, remote_dataset_hashmap, dataset_flags)
+        pathr = is_result(filepath[0],results_dict, sub_directory_path)
 
-        new_paths.append((new_filepath, filepath[1]))
+        if pathr: # if it is a result then it is specially mapped inside Result/ in the sub-dir
+            new_paths.append((pathr,filepath[1]))
+
+        else: # it is treated as a normal path inside application_sources or dataset
+            new_filepath = address_converter(path, filepath[0],dataset_hashmap,
+                                    application_sources_hashmap, remote_dataset_hashmap, dataset_flags)
+            new_paths.append((new_filepath, filepath[1]))
+
 
     paths = new_paths
 
@@ -107,7 +185,8 @@ def command_line_generator(command: str, path: str, dataset_hashmap: dict,
     p2 = 0
 
     new_command = []
-
+    # for this to work paths and value must be sorted by index
+    values = sorted(values, key=lambda x: x[1]) # needed to add this because of appending result paths at the end
     while p1 < len(paths) and p2 < len(values):
         if paths[p1][1] < values[p2][1]:
             new_command.append(paths[p1][0])
@@ -130,3 +209,10 @@ def command_line_generator(command: str, path: str, dataset_hashmap: dict,
         new_command[0] = "runcompss"
 
     return new_command
+
+def get_file_names(folder_path: str) -> dict:
+    file_names = {}
+    for root, dirs, files in os.walk(folder_path):
+        for file in files:
+            file_names[file] = os.path.join(root, file)
+    return file_names
