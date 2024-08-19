@@ -310,6 +310,18 @@ def get_previous_flags(crate_path: str) -> list[str]:
 
     return previous_flags
 
+def print_symbol_reference():
+    references = {
+        '✔': 'SUCCESS',
+        '✘': 'FAILURE',
+        '–': 'NOT IN METADATA'
+    }
+
+    # Create a single line of references
+    reference_line = ' | '.join(f"{symbol}: {meaning}" for symbol, meaning in references.items())
+
+    print(reference_line)
+
 # Function to convert status codes to symbols
 def get_status_symbol(file_exists, file_size_verified):
     exists_symbol = "✅" if file_exists == 1 else "❌"
@@ -323,7 +335,6 @@ def wrap_text(text, width):
 # Function to generate the table
 def generate_file_status_table(file_status_list,Third_field:str, path_width_limit=30):
     table = []
-
     # Adding header row
     table.append(["S.No.", "Filename", "File Path", Third_field , "File Size Verified"])
 
@@ -338,5 +349,6 @@ def generate_file_status_table(file_status_list,Third_field:str, path_width_limi
 
     # Print the table
     print(tabulate(table, headers="firstrow", tablefmt="grid"))
+    print_symbol_reference()
 
 

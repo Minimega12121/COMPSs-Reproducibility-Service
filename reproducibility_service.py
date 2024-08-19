@@ -173,5 +173,3 @@ if __name__ == "__main__":
 # remote_dataset_example: https://workflowhub.eu/workflows/1072/ro_crate?version=1
 # basic_example: https://workflowhub.eu/workflows/710/ro_crate?version=1\
 
-# to do:
-# add provenance for dpf slurm
