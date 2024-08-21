@@ -13,19 +13,10 @@ so it must be declared as " runcompss /main.py "
 import os
 import shlex
 import re
-import subprocess
-from .address_mapper import address_converter, addr_extractor
+
 from rocrate.rocrate import ROCrate
-
-def check_slurm_cluster() -> tuple[bool, str]:
-    try:
-        result = subprocess.run(['squeue'], capture_output=True, text=True)
-        if result.returncode == 0:
-            return True, result.stdout
-    except Exception as e:
-        return False, str(e)
-
-    return False, "squeue command failed without raising an exception"
+from .address_mapper import address_converter, addr_extractor
+from .utilsr import get_file_names, get_results_dict, check_slurm_cluster
 
 def generate_command_line(self, sub_directory_path:str) -> list[str]:
     """
@@ -40,7 +31,6 @@ def generate_command_line(self, sub_directory_path:str) -> list[str]:
     """
     print('\nParsing metadata...', self.crate_directory)
     path = self.crate_directory
-
     dataset_flags = (self.remote_dataset_flag, self.new_dataset_flag)
 
     remote_dataset_hashmap = {}
@@ -63,25 +53,6 @@ def generate_command_line(self, sub_directory_path:str) -> list[str]:
                                      dataset_hashmap, application_sources_hashmap,remote_dataset_hashmap,dataset_flags,self.remote_dataset_flag, sub_directory_path)
 
     return new_command
-
-def get_Create_Action(entity:ROCrate):
-    # Loop through all entities in the RO-Crate
-    for entity in entity.get_entities():
-        if entity.type == "CreateAction":
-            return entity
-    return None
-
-def get_results_dict(entity:ROCrate):
-    createAction = get_Create_Action(entity)
-    results= {}
-    if "result" in createAction: # It is not necessary to have inputs/objects in Create Action
-        temp = createAction["result"]
-    else:
-        return None
-
-    for result in temp:
-        results[result["name"]] = result.id
-    return results
 
 def commonsuffix(path1:str,path2:str):
     paths = [path1, path2]
@@ -136,7 +107,8 @@ def command_line_generator(command: str, path: str, dataset_hashmap: dict,
     flags = []
     paths = []
     values = []
-
+    print(1)
+    print(path)
     files_a = get_file_names(os.path.join(path, "application_sources"))
     files_d = get_file_names(os.path.join(path, "dataset"))
     files_r  = get_file_names(os.path.join(path, "remote_dataset"))
@@ -209,10 +181,3 @@ def command_line_generator(command: str, path: str, dataset_hashmap: dict,
         new_command[0] = "runcompss"
 
     return new_command
-
-def get_file_names(folder_path: str) -> dict:
-    file_names = {}
-    for root, dirs, files in os.walk(folder_path):
-        for file in files:
-            file_names[file] = os.path.join(root, file)
-    return file_names

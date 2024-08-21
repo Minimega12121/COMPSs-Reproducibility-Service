@@ -4,12 +4,6 @@ RS provenance flag logic Module
 This module gets used in case the user triggers the provenance flag. It does the necessary
 steps to generate the provenence for COMPSs Runtime
 
-
-Functions:
-    - update_yaml(crate_path: str)
-        Update the 'ro-crate-info.yaml' file with workflow metadata.
-    - provenance_info_collector() -> bool
-        Collects the provenance information from the user
 """
 import os
 import time

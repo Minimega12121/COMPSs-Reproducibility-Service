@@ -1,5 +1,7 @@
 """
-    Utils Module: It contains utility functions that are used in the main script or other modules.
+Utils Module
+
+It contains utility functions that are used in the main script or other modules.
 """
 import os
 import yaml

@@ -1,24 +1,32 @@
+"""
+Get Workflow Module
+
+Does different operations such as to get the workflow, get more flags,
+and change values in the final command
+
+"""
 import os
 import shutil
 import zipfile
 import urllib.parse
-# Works/workflow-838-1.crate.zip
+
 from utils import print_colored,print_colored_ns, TextColor, executor, get_yes_or_no
 
-def get_workflow(execution_path: str, link_or_path: str) -> None:
-    workflow_path = os.path.join(execution_path, "Workflow")
-    # if len(os.listdir(workflow_path)) == 1:
-    #     flag = get_yes_or_no(f"There already exists a workflow './Workflow/{os.listdir(workflow_path)[0]}'. Do you want to use it(y) or give another workflow(n)? (yes/no):")
-    #     if not flag:
-    #         if os.path.isdir(os.path.join(workflow_path, os.listdir(workflow_path)[0])):
-    #             shutil.rmtree(os.path.join(workflow_path, os.listdir(workflow_path)[0]))
-    #         else:
-    #             os.unlink(os.path.join(workflow_path, os.listdir(workflow_path)[0]))
-    #     else:
-    #         return
-    # elif len(os.listdir(workflow_path)) > 1:
-    #     raise ValueError("The directory './Workflow' contains multiple crates. Please ensure it is empty or contains one crate before running this script.")
+def get_workflow(execution_path: str, link_or_path: str) -> str:
+    """
+    Get the workflow from the path or link provided by the user.
+    If path it may need to extract it to the workflow directory.
 
+    Args:
+        execution_path (str): The path to the execution directory.
+        link_or_path (str): The link or path to the workflow.
+
+    Raises:
+        ValueError: It can occur if the file is not a valid zip file or the link is not a valid URL.
+    Returns:
+        str: The path to the workflow
+    """
+    workflow_path = os.path.join(execution_path, "Workflow")
     workflow_source = None
 
     if link_or_path.startswith("http"):
@@ -31,13 +39,9 @@ def get_workflow(execution_path: str, link_or_path: str) -> None:
         crate_path = link_or_path
         print("The path to the crate is:", crate_path)
 
-        # if not os.path.isfile(crate_path):
-        #     raise FileNotFoundError(f"The file at path {crate_path} was not found.")
-
         if zipfile.is_zipfile(crate_path):
             shutil.copy(crate_path, os.path.join(workflow_path, "my_crate.zip"))
-        elif os.path.isdir(crate_path): # just return the orignal path in case of path given to not have storage issue
-            # shutil.copytree(crate_path, os.path.join(workflow_path, "crate"))
+        elif os.path.isdir(crate_path):
             return crate_path
         else:
             raise ValueError(f"The file at path {crate_path} is not a valid")
@@ -60,15 +64,24 @@ def get_workflow(execution_path: str, link_or_path: str) -> None:
     try:
         with zipfile.ZipFile(crate_zip_path, 'r') as zip_ref:
             zip_ref.extractall(workflow_path)
+        print(f"The workflow has been successfully extracted to {workflow_path}")
         return workflow_path # returns crate path
     except zipfile.BadZipFile as e:
         raise ValueError(f"The file {crate_zip_path} is not a valid zip file or it is corrupted.")
     finally:
         os.remove(crate_zip_path)
 
-    print(f"The workflow has been successfully extracted to {workflow_path}")
-
 def get_more_flags(command: list[str], previous_flags: list[str]) -> list[str]:
+    """
+    Get more flags from the user to add to the final command.
+
+    Args:
+        command (list[str]): current command
+        previous_flags (list[str]): old flags as reference
+
+    Returns:
+        list[str]: new command
+    """
     print_colored("The current command is as follows:", TextColor.YELLOW)
     print_colored(" ".join(command), TextColor.YELLOW)
     previous_flags_str = " ".join(previous_flags)
@@ -87,6 +100,18 @@ def get_more_flags(command: list[str], previous_flags: list[str]) -> list[str]:
     return command
 
 def get_change_values(command : list[str]) -> list[str]:
+    """
+    Change the values of the final command based on the user input.
+
+    Args:
+        command (list[str]): The current command
+
+    Raises:
+        ValueError: If the user enters an invalid integer.
+
+    Returns:
+        list[str]: The new command
+    """
     print_colored("The current command is as follows:", TextColor.YELLOW)
     print_colored_ns(" ".join(command), TextColor.YELLOW)
     if not get_yes_or_no("Do you want to change anything from the above command?"):
@@ -119,7 +144,4 @@ def get_change_values(command : list[str]) -> list[str]:
                 print_colored_ns(f"{i+1}. {command[i]}", TextColor.YELLOW)
             print_colored("Are you happy with the changes above?", TextColor.YELLOW)
             satisfied = not get_yes_or_no("")
-
-
-    return command
-    ...
+        return command

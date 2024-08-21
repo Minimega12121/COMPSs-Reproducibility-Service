@@ -5,14 +5,6 @@ This module provides functions for handling file operations such as removing tem
 moving newly created files to a 'Result' folder, and copying files from specific directories
 to the current working directory.
 
-Functions:
-- move_results_created(initial_files, temp): Removes temporary files and moves newly created files
-  to a 'Result' folder in the current working directory.
-- dataset_mover_and_application_mover(crate_directory): Copies all files from 'application_sources'
-  and 'dataset' folders within the crate directory to the current working directory.
-- copy_all_to_cwd(src_path): Recursively copies all files and directories from the specified source
-  path to the current working directory.
-
 """
 
 import os

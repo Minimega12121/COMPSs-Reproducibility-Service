@@ -4,16 +4,12 @@ RS File Verification Module
 This module verifies files referenced in an RO-Crate against their metadata,
 ensuring their existence and optionally their size and modification date.
 
-Functions:
-    - files_verifier(crate_path: str, instrument: str, objects: list[str])
-      Verify files within an RO-Crate against their metadata.
 """
 
 import os
 
 from rocrate.rocrate import ROCrate
 from utils import get_by_id, print_colored, TextColor, generate_file_status_table
-import datetime as dt
 
 def files_verifier(crate_path: str, instrument: str, objects: dict, remote_dataset_dict: dict):
     """
@@ -59,12 +55,12 @@ def files_verifier(crate_path: str, instrument: str, objects: dict, remote_datas
     #Verify the objects/inputs
     crate = ROCrate(crate_path)
 
-    if objects == None:
+    if not objects:
         print_colored("No objects found in the crate, so nothing to verify", TextColor.GREEN)
         return
 
     for name,input in objects.items():
-        if remote_dataset_dict != None and name[0] in remote_dataset_dict: # Do not verifiy the local objects if remote dataset exists
+        if not remote_dataset_dict and name[0] in remote_dataset_dict: # Do not verifiy the local objects if remote dataset exists
             continue
         # Skip the remote objects
         if input.startswith("http"):

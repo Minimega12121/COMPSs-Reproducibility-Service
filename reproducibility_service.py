@@ -191,5 +191,5 @@ if __name__ == "__main__":
     except Exception as e:
         print_colored(e,TextColor.RED)
         sys.exit(1)
-        
+
     sys.exit(0)

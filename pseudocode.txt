@@ -1,4 +1,6 @@
-
+"""
+Just a pseudocode to show the main steps of the workflow. This is not a real code, and it is not intended to be executed.
+"""
 # Getting the crate
 link = ask_user_for_ro-crate_link:
 if link.startswith('http'):

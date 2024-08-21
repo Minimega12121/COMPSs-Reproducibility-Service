@@ -1,9 +1,21 @@
-import os
-import time
+"""
+New Dataset Backend
 
+This module asks the user if they want to add the new_dataset and gives the
+directory structure of the old dataset as reference.
+"""
+import os
 from utils import print_colored, TextColor, get_yes_or_no
 
-def print_directory_contents(path, level=0):
+def print_directory_contents(path:str, level=0):
+    """
+    Print the contents of a directory with indentation.
+    To show the directory structure in a tree-like format
+
+    Args:
+        path (str): path to the directory
+        level (int, optional): Defaults to 0.
+    """
     try:
         # List all the entries in the directory
         for entry in os.listdir(path):
@@ -19,9 +31,16 @@ def print_directory_contents(path, level=0):
 
 
 def new_dataset_info_collector(crate_directory:str):
+    """
+    Collect information about the new dataset.
+    Whether the user wants to add a new dataset or not.
+
+    Args:
+        crate_directory (str): the path to the root directory of the RO-Crate.
+    """
     new_dataset_path = os.path.join(crate_directory, "new_dataset")
     os.makedirs(new_dataset_path)
-    print(f"\nPlease copy the new dataset to the 'new_dataset' folder :\n")
+    print("\nPlease copy the new dataset to the 'new_dataset' folder :\n")
     print_colored("New dataset path: " + new_dataset_path, TextColor.BLUE)
     print_colored("WARNING| MAKE SURE THE NEW DATASET FOLLOWS THE SAME DIRECTORY STRUCTURE AS THE OLD DATASET", TextColor.RED)
     print("The old directory structure for reference is as follows:\n")

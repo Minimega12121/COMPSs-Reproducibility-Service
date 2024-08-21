@@ -1,12 +1,22 @@
-from utils import print_colored, TextColor, get_objects, get_by_id, get_instument, get_objects_dict, get_results_dict, check_slurm_cluster, executor, get_previous_flags
-from utils import get_file_names, get_by_id, generate_file_status_table
-from rocrate.rocrate import ROCrate
-from urllib.parse import urlparse
-from get_workflow import get_more_flags, get_change_values
+"""
+    Data Persistance False (DPF) Module
+
+    This is for the worflow where the data persistance is set to false. It is exclusively for SLURM clusters.
+    This module verifies the accessibility of the files in the crate and checks if the files are accessible.
+    It also verifies the files in the crate against their metadata. It also checks if the crate was created
+    with data persistance set to false and runs the workflow on the cluster in which the dataset paths are available.
+"""
 import os
 import datetime as dt
 import re
 import shlex
+
+from urllib.parse import urlparse
+from rocrate.rocrate import ROCrate
+from utils import print_colored, TextColor, get_objects, get_by_id, get_instument, get_objects_dict
+from utils import get_results_dict, check_slurm_cluster, executor, get_previous_flags
+from utils import get_file_names, generate_file_status_table
+from get_workflow import get_more_flags, get_change_values
 
 RESULT_PATH:str = None
 OUTPUT_NUM:int = 0
@@ -26,7 +36,8 @@ def check_file_accessibility(crate: ROCrate) -> tuple[bool,dict]:
     accessibility = {}
     flag = True
     for path in file_paths:
-        if path.startswith("http"): # do not consider remote path for cluster due to no connection
+        if path.startswith("http"):
+            # do not consider remote path for cluster due to no connection
            continue
         parsed_url = urlparse(path)
         # Remove the 'file://<id>' prefix
@@ -80,7 +91,8 @@ def files_verifier_dpf(crate_path: str):
     crate = ROCrate(crate_path)
     file_paths = get_objects(crate)
     for path in file_paths:
-        if path.startswith("http"): # do not consider remote path for cluster due to no connection
+        if path.startswith("http"):
+        # do not consider remote path for cluster due to no connection
            continue
 
         parsed_url = urlparse(path)
@@ -133,6 +145,15 @@ def files_verifier_dpf(crate_path: str):
         raise ValueError(f"DateModified mismatch in files: {temp_date}")
 
 def data_persistance_false_verifier(crate_path:str):
+    """
+    Verify if the crate was created with data persistance set to false.
+
+    Args:
+        crate_path (str): the path to the root directory of the RO-Crate.
+
+    Raises:
+        ValueError: If some files are not accessible 
+    """
     if check_slurm_cluster()[0]:
         print("Slurm cluster")
     else:
@@ -228,7 +249,23 @@ def address_converter_backend(path: str, addr: str, dataset_hashmap: dict) -> st
 
     return mapped_addr
 
-def address_mapper_dpf(addr:str, object_list, result_list, application_sources_hash_map: dict, path:str) -> str:
+def address_mapper_dpf(addr:str, object_list: list, result_list: list, application_sources_hash_map: dict, path:str) -> str:
+    """
+    Map the given address to a path inside the RO-Crate based on the given object and result lists.
+
+    Args:
+        addr (str): the address to map
+        object_list (_type_): list of objects from metadata
+        result_list (_type_): list of results from metadata
+        application_sources_hash_map (dict): hashmap of application sources
+        path (str): the path to the RO-Crate
+
+    Raises:
+        FileNotFoundError: if the mapped path does not exist
+
+    Returns:
+        str: mapped path
+    """
     filename = None
     mapped_addr = None
     application_path = os.path.join(path, "application_sources")
@@ -360,15 +397,12 @@ def url_splitter(addr: str)-> list[str]:
 
 def command_line_generator_dpf(command: str,path:str) -> list[str]:
     """
-    Generates a modified command line by replacing paths in the command with their
-    mapped counterparts based on the dataset and application sources mappings.
-    Acts as the main logic behind generate_command_line.
+    Modify the command line arguments to map the paths to the paths
+    defined inside the ro-crate-metadata.json file.
 
     Args:
         command (str): Original command line string.
         path (str): Path to the RO_Crate directory.
-        dataset_hashmap (dict): Hashmap generated from addr_extractor.
-        application_sources_hashmap (dict): Hashmap generated from addr_extractor.
 
     Returns:
         list[str]: Modified command line arguments with mapped paths.
@@ -452,10 +486,20 @@ def command_line_generator_dpf(command: str,path:str) -> list[str]:
 
     return new_command
 
-def run_dpf(EXECUTION_PATH:str, crate_path: str) ->bool:
+def run_dpf(execution_path:str, crate_path: str) ->bool:
+    """
+    Run the workflow on the cluster in which the dataset paths are available
+
+    Args:
+        execution_path (str): the path to the execution directory
+        crate_path (str): the path to the root directory of the RO-Crate
+
+    Returns:
+        bool: True if the workflow was executed successfully, False otherwise
+    """
     try:
         global RESULT_PATH
-        RESULT_PATH = os.path.join(EXECUTION_PATH,"Result")
+        RESULT_PATH = os.path.join(execution_path,"Result")
         compss_submission_command_path = os.path.join(crate_path, "compss_submission_command_line.txt")
 
         with open(compss_submission_command_path, 'r', encoding='utf-8') as file:
@@ -468,7 +512,7 @@ def run_dpf(EXECUTION_PATH:str, crate_path: str) ->bool:
 
         new_command = get_change_values(new_command)
 
-        result = executor(new_command,EXECUTION_PATH)
+        result = executor(new_command,execution_path)
 
         return result
     except Exception as e:
