@@ -1,3 +1,6 @@
+"""
+    Utils Module: It contains utility functions that are used in the main script or other modules.
+"""
 import os
 import yaml
 import shutil
@@ -20,12 +23,27 @@ class TextColor:
     RESET = '\033[0m'
 
 def print_colored(text, color):
+    """
+    To print colored text in the console.
+    Args:
+        text (str):  The text to be printed.
+        color (str):  The color to be used for printing the text.
+    """
     print(f"\n{color}{text}{TextColor.RESET}\n")
 
 def print_colored_ns(text, color):
+    """
+    To print colored text in the console without new line.
+    Args:
+        text (str):  The text to be printed.
+        color (str):  The color to be used for printing the text.
+    """
     print(f"{color}{text}{TextColor.RESET}")
 
 def print_welcome_message():
+    """
+    To print the welcome message in the console.
+    """
     welcome_text = """
     ╔════════════════════════════════════════════════════╗
     ║                                                    ║
@@ -45,6 +63,15 @@ def print_welcome_message():
     time.sleep(1)
 
 def get_by_id(entity:ROCrate, id:str):
+    """
+    To parse the ROCrate and get the entity with the specified ID.
+    Args:
+        entity (ROCrate): The ROCrate object.
+        id (str): The ID of the entity to be retrieved.
+
+    Returns:
+        _type_: None if not found else the entity with the specified ID.
+    """
     # Loop through all entities in the RO-Crate
     for entity in entity.get_entities():
         if entity.id == id:
@@ -52,6 +79,14 @@ def get_by_id(entity:ROCrate, id:str):
     return None
 
 def get_Create_Action(entity:ROCrate):
+    """
+    To get the CreateAction entity from the ROCrate.
+    Args:
+        entity (ROCrate): The ROCrate object.
+
+    Returns:
+        _type_: None if not found else the CreateAction entity.
+    """
     # Loop through all entities in the RO-Crate
     for entity in entity.get_entities():
         if entity.type == "CreateAction":
@@ -59,13 +94,30 @@ def get_Create_Action(entity:ROCrate):
     return None
 
 def get_instument(entity:ROCrate):
+    """
+    To get the instrument ID from the CreateAction entity.
+    Args:
+        entity (ROCrate): The ROCrate object.
+
+    Returns:
+        _type_: The ID of the instrument.
+    """
     createAction = get_Create_Action(entity)
     return createAction["instrument"].id
 
-def get_objects(entity:ROCrate):
+def get_objects(entity:ROCrate) -> list[str]:
+    """
+    To get the objects from the CreateAction entity.
+    Args:
+        entity (ROCrate): The ROCrate object.
+
+    Returns:
+        _type_: A list of object IDs.
+    """
     createAction = get_Create_Action(entity)
     objects= []
-    if "object" in createAction: # It is not necessary to have inputs/objects in Create Action
+    if "object" in createAction:
+        # It is not necessary to have inputs/objects in Create Action
         temp = createAction["object"]
     else:
         return None
@@ -78,10 +130,19 @@ def get_objects(entity:ROCrate):
             objects.append(val.id)
     return objects
 
-def get_results_dict(entity:ROCrate):
+def get_results_dict(entity:ROCrate)->dict:
+    """
+    To get the results from the CreateAction entity.
+    Args:
+        entity (ROCrate): The ROCrate object.
+
+    Returns:
+        _type_: A dictionary mapped from the result name to the result ID.
+    """
     createAction = get_Create_Action(entity)
     results= {}
-    if "result" in createAction: # It is not necessary to have inputs/objects in Create Action
+    if "result" in createAction:
+        # It is not necessary to have inputs/objects in Create Action
         temp = createAction["result"]
     else:
         return None
@@ -92,37 +153,72 @@ def get_results_dict(entity:ROCrate):
 
 
 def get_objects_dict(entity:ROCrate)->dict:
+    """
+    To get the objects from the CreateAction entity.
+    Args:
+        entity (ROCrate): The ROCrate object.
+
+    Returns:
+        dict:A dict of (name,id) -> id , so that it does'nt collide with the same name
+    """
     createAction = get_Create_Action(entity)
     objects= {}
-    if "object" in createAction: # It is not necessary to have inputs/objects in Create Action
+    if "object" in createAction:
+        # It is not necessary to have inputs/objects in Create Action
         temp = createAction["object"]
     else:
         return None
 
     for input in temp:
-        if "hasPart" in input: # if hasPart exists, it means it is a composite object
+        if "hasPart" in input:
+            # if hasPart exists, it means it is a composite object
             for has in input["hasPart"]:
                 objects[(has["name"],has.id)] = has.id
         else:
-            objects[(input["name"],input.id)] = input.id # else it is just a single object
+            objects[(input["name"],input.id)] = input.id
+            # else it is just a single object
     return objects
 
 def key_exists_with_first_element(d, first_element):
     return any(key[0] == first_element for key in d)
 
 def get_file_names(folder_path: str) -> dict:
+    """
+        To get the file names from the specified folder path.
+    Args:
+        folder_path (str): path to the folder.
+
+    Returns:
+        dict: dictionary of file names and their full paths.
+    """
     file_names = {}
     for root, dirs, files in os.walk(folder_path):
         for file in files:
             file_names[file] = os.path.join(root, file)
     return file_names
 
-def get_compss_crate_version(crate_path: str) -> float:
+def get_compss_crate_version(crate_path: str) ->  str:
+    """
+    Gets the COMPSs version used to create the ROCrate.
+    Args:
+        crate_path (str): The path to the ROCrate.
+
+    Returns:
+        float: The version of COMPSs used to create the ROCrate.
+    """
     crate = ROCrate(crate_path)
     compss_object = get_by_id(crate,"#compss")
     return compss_object["version"]
 
 def get_yes_or_no(msg :str) :
+    """
+    To get the user input as 'y' or 'n'.
+    Args:
+        msg (str): The message outputed to the user
+
+    Returns:
+        _type_: True if 'y' else False if 'n'.
+    """
     while True:
         user_input = input(f"{msg} (y/n):").lower()
         if user_input == 'y' or user_input == 'n':
@@ -134,6 +230,16 @@ def get_yes_or_no(msg :str) :
             print("Invalid input. Please enter 'y' or 'n'.")
 
 def get_data_persistence_status(crate_path:str) -> bool:
+    """
+    To get data_persistanace status from ro-crate-yaml file.
+    Args:
+        crate_path (str): Path for the crate directory.
+    Raises:
+        FileNotFoundError: If ro-crate-info.yaml file not found in the crate.
+
+    Returns:
+        bool: True if data_persistence is True else False.
+    """
     #It may not be named ro-crate-info.yaml, eg: 838-1 crate
     yaml_file_path = None
     for name in os.listdir(crate_path):
@@ -147,11 +253,20 @@ def get_data_persistence_status(crate_path:str) -> bool:
         # Load the content of the YAML file
         config = yaml.safe_load(file)
     # Extract the value of data_persistence
-    data_persistence = config.get('COMPSs Workflow Information', {}).get('data_persistence', None)
+    data_persistence = config.get('COMPSs Workflow Information',
+                                  {}).get('data_persistence', None)
 
     return data_persistence
 
-def get_name_and_description(crate_path: str) -> tuple[str, str]:
+def get_name_and_description(crate_path: str) -> tuple:
+    """
+    To get the name and description from the ro-crate-info.yaml file.
+    Args:
+        crate_path (str): Path to the crate directory.
+
+    Returns:
+        tuple: returns tuple of name, description and authors.
+    """
      #It may not be named ro-crate-info.yaml, eg: 838-1 crate
     yaml_file_path = None
     for name in os.listdir(crate_path):
@@ -193,6 +308,15 @@ def get_ro_crate_info(execution_path: str, service_path: str):
 
 
 def executor(command: list[str], execution_path: str) :
+    """
+    Uses subprocess librray to execute the command and logs the output to a file.
+    Args:
+        command (list[str]): list of str containing the command to be executed
+        execution_path (str): path to the execution directory
+
+    Returns:
+        _type_: True if the command executed successfully else False.
+    """
     joined_command = " ".join(command)
     print_colored(f"Executing command: {joined_command}", TextColor.BLUE)
 
@@ -206,7 +330,8 @@ def executor(command: list[str], execution_path: str) :
     stderr_log = os.path.join(log_dir, "err.log")
 
     # Start the subprocess
-    process = subprocess.Popen(command, stdout=subprocess.PIPE, stderr=subprocess.PIPE, text=True)
+    process = subprocess.Popen(command, stdout=subprocess.PIPE,
+                               stderr=subprocess.PIPE, text=True)
 
     # Define functions to read and log output
     def read_stdout(pipe, log_file):
@@ -250,6 +375,13 @@ def executor(command: list[str], execution_path: str) :
         return False
 
 def download_file(url: str , download_path: str, file_name: str):
+    """
+    Downloads a file from the specified URL and saves it to the specified path.
+    Args:
+        url (str):  The URL of the file to be downloaded.
+        download_path (str):  The path where the file should be saved.
+        file_name (str):  The name of the file to be saved.
+    """
     if not os.path.exists(download_path):
         os.makedirs(download_path)
     # Create the full path to the file
@@ -268,7 +400,12 @@ def download_file(url: str , download_path: str, file_name: str):
         os.remove(full_path)
         print(f"Removed the zip file {file_name}")
 
-def check_compss_version()-> float:
+def check_compss_version()-> str:
+    """
+    To check the version of COMPSs installed on the system.
+    Returns:
+        float: The version of COMPSs installed on the system.
+    """
     try:
         # Execute the command
         result = subprocess.run(['runcompss', '-v'], capture_output=True, text=True, check=True)
@@ -276,7 +413,7 @@ def check_compss_version()-> float:
         # Parse the output
         output = result.stdout.strip()
         if "COMPSs version" in output:
-            version = float(output.split('COMPSs version ')[1].split(" ")[0])
+            version = output.split('COMPSs version ')[1].split(" ")[0]
             print(f"COMPSs Version Found :{version}")
             return version
         else:
@@ -288,6 +425,13 @@ def check_compss_version()-> float:
         return "runcompss command not found. Please ensure that COMPSs is installed and the command is available in your PATH."
 
 def check_slurm_cluster() -> tuple[bool, str]:
+    """
+    To check if the program is running on a SLURM cluster.
+
+    Returns:
+        tuple[bool, str]: tuple of a boolean indicating if the program
+            is running on a SLURM cluster and a message.
+    """
     try:
         result = subprocess.run(['squeue'], capture_output=True, text=True)
         if result.returncode == 0:
@@ -298,6 +442,15 @@ def check_slurm_cluster() -> tuple[bool, str]:
     return False, "squeue command failed without raising an exception"
 
 def get_previous_flags(crate_path: str) -> list[str]:
+    """
+    To get the previous flags used in the COMPSs submission command.
+
+    Args:
+        crate_path (str): The path to the crate directory.
+
+    Returns:
+        list[str]: A list of the previous flags used in the COMPSs submission command.
+    """
     compss_submission_command_path = os.path.join(crate_path, "compss_submission_command_line.txt")
 
     with open(compss_submission_command_path, 'r', encoding='utf-8') as file:
@@ -311,6 +464,9 @@ def get_previous_flags(crate_path: str) -> list[str]:
     return previous_flags
 
 def print_symbol_reference():
+    """
+    To print the reference line for the symbols used in the file status table
+    """
     references = {
         '✔': 'SUCCESS',
         '✘': 'FAILURE',
@@ -324,16 +480,28 @@ def print_symbol_reference():
 
 # Function to convert status codes to symbols
 def get_status_symbol(file_exists, file_size_verified):
+    """
+    To convert the status codes to symbols.
+    """
     exists_symbol = "✅" if file_exists == 1 else "❌"
     size_verified_symbol = "✅" if file_size_verified == 1 else "❌" if file_size_verified == 0 else "—"
     return exists_symbol, size_verified_symbol
 
 # Function to wrap the file path based on a length limit
 def wrap_text(text, width):
+    """
+    To wrap the text based on the specified width.
+    """
     return '\n'.join([text[i:i+width] for i in range(0, len(text), width)])
 
 # Function to generate the table
 def generate_file_status_table(file_status_list,Third_field:str, path_width_limit=30):
+    """
+    To generate a table to display the file status.
+    Args:
+        file_status_list (): list of tuples containing the file status information.
+        Third_field (str): The name of the third field in the table.
+    """
     table = []
     # Adding header row
     table.append(["S.No.", "Filename", "File Path", Third_field , "File Size Verified"])
