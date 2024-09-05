@@ -47,9 +47,9 @@ def check_file_accessibility(crate: ROCrate) -> tuple[bool,dict]:
             accessibility[file_path] = os.access(file_path, os.R_OK)
             if accessibility[file_path] == False:
                 flag = False
-                print(file_path+ "\n" + "INACCESSIBLE")
-            else:
-                print(file_path+ "\n" + "ACCESSIBLE")
+            #     print(file_path+ "\n" + "INACCESSIBLE")
+            # else:
+            #     print(file_path+ "\n" + "ACCESSIBLE")
 
     return flag,accessibility
 
@@ -114,7 +114,7 @@ def files_verifier_dpf(crate_path: str):
                 temp_size.append(file_path)
             else:
                 file_tuple = (file_tuple[0], file_tuple[1], file_tuple[2], 1)
-                print(f"Size of {file_path} is correct")
+                # print(f"Size of {file_path} is correct")
 
         actual_modified_date = dt.datetime.utcfromtimestamp(os.path.getmtime(file_path)).replace(microsecond=0).isoformat()
         if "dateModified" in file_object and actual_modified_date != file_object["dateModified"][:-6]:
