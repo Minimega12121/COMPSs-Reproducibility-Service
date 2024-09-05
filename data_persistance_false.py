@@ -506,7 +506,7 @@ def run_dpf(execution_path:str, crate_path: str) ->bool:
             compss_submission_command = next(file).strip()
 
         new_command = command_line_generator_dpf(compss_submission_command,crate_path)
-        print("New command is:",new_command)
+        # print("New command is:",new_command)
         previous_flags = get_previous_flags(crate_path) # get the flags from the previous command
         new_command = get_more_flags(new_command, previous_flags) # ask user for more flags he/she wants to add to the final compss command
 
