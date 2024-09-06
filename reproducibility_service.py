@@ -151,7 +151,7 @@ if __name__ == "__main__":
         print("Service path is:",SERVICE_PATH)
         SUB_DIRECTORY_PATH = create_new_execution_directory(SERVICE_PATH)
         print("Sub-directory path is:",SUB_DIRECTORY_PATH)
-        os.chdir(SUB_DIRECTORY_PATH)
+
 
         te = open(os.path.join(SUB_DIRECTORY_PATH,'log/rs_log.txt'), 'w', encoding='utf-8')  #  for logging purposes
 
@@ -161,6 +161,7 @@ if __name__ == "__main__":
         print(f"Source for crate: {link_or_path}")
         CRATE_PATH = get_workflow(SUB_DIRECTORY_PATH, link_or_path )
         print("Crate path is:",CRATE_PATH)
+        os.chdir(SUB_DIRECTORY_PATH) # Avoid problems when relative paths are used as parameter
         if not SLURM_CLUSTER:
             NEW_DATASET_FLAG = get_yes_or_no("Do you want to reproduce the crate on a new dataset?")
 
