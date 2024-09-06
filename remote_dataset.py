@@ -27,7 +27,7 @@ def remote_dataset(crate: ROCrate,crate_directory: str) -> bool:
     if "object" in  create_action:
         temp = create_action["object"]
     else:
-        return (False, None)
+        return (False, {})
 
     for input in temp: # get the remote_datasets mapped with their names
         if (input.id).startswith("http"):
@@ -50,6 +50,6 @@ def remote_dataset(crate: ROCrate,crate_directory: str) -> bool:
             sys.exit(1)
 
     if len(remote_datasets) == 0:
-        return (False, None)
+        return (False, {})
 
     return (True, remote_datasets)

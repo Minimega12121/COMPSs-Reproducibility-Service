@@ -34,6 +34,7 @@ COMPSS_VERSION:str = None
 SLURM_CLUSTER:bool = None
 DPF: bool = False
 CRATE_PATH: str = None
+DATA_PERSISTENCE: bool = False
 
 def interrupt_handler(): # signal handler for cleaning up in case of an interrupt
     """
@@ -79,14 +80,15 @@ class ReproducibilityService:
         self.remote_dataset_flag = False
 
         crate_compss_version:str = get_compss_crate_version(self.crate_directory)
-        print(f"COMPSs VERSION USED INSIDE CRATE: {crate_compss_version}")
+        print_colored(f"COMPSs version used in the original run: {crate_compss_version}", TextColor.BLUE)
 
         # not using currently to run 3.3.1,3.3 examples on a 3.3 or 3.3.1 compss machine
         if COMPSS_VERSION != crate_compss_version:
             print_colored(f"WARNING: The crate was created with COMPSs version: {get_compss_crate_version(self.crate_directory)}, which differs with the COMPSs version found locally: {COMPSS_VERSION}", TextColor.YELLOW)
 
         try:
-            if not get_data_persistence_status(self.crate_directory):
+            global DATA_PERSISTENCE
+            if not DATA_PERSISTENCE:
                 data_persistance_false_verifier(self.crate_directory)
                 global DPF
                 DPF = True
@@ -95,17 +97,15 @@ class ReproducibilityService:
             if new_dataset_flag:
                 new_dataset_info_collector(self.crate_directory)
             else: # verify the metadata only if the old dataset is used
-                print("Reproducing the crate on the old dataset.")
+                # print("Reproducing the crate on the old dataset.")
                 crate = ROCrate(self.crate_directory)
-                instrument= get_instument(crate)
-                objects= get_objects_dict(crate)
+                instrument = get_instument(crate)
+                objects = get_objects_dict(crate)
                 # download the remote data-set if it exists and return true if it exists
                 (self.remote_dataset_flag, remote_dataset_dict) = remote_dataset(crate, self.crate_directory)
                 files_verifier(self.crate_directory, instrument, objects, remote_dataset_dict)
-            if provenance_flag: #update the sorces inside the yaml file
+            if provenance_flag: #update the sources inside the yaml file
                 update_yaml(self.crate_directory)
-
-
 
         except Exception as e:
             print_colored(e,TextColor.RED)
@@ -146,12 +146,11 @@ if __name__ == "__main__":
         PROVENANCE_FLAG = False
         COMPSS_VERSION:str = check_compss_version() # To check if compss is installed, if yes extract the version, else exit the program
         SLURM_CLUSTER = check_slurm_cluster()[0] # To check if the program is running on the SLURM cluster
-        print("Slurm cluster:",SLURM_CLUSTER)
+        print("Slurm cluster:", SLURM_CLUSTER)
         SERVICE_PATH= os.path.dirname(os.path.abspath(__file__))
-        print("Service path is:",SERVICE_PATH)
+        print("Service path is:", SERVICE_PATH)
         SUB_DIRECTORY_PATH = create_new_execution_directory(SERVICE_PATH)
-        print("Sub-directory path is:",SUB_DIRECTORY_PATH)
-
+        print("Sub-directory path is:", SUB_DIRECTORY_PATH)
 
         te = open(os.path.join(SUB_DIRECTORY_PATH,'log/rs_log.txt'), 'w', encoding='utf-8')  #  for logging purposes
 
@@ -159,13 +158,16 @@ if __name__ == "__main__":
 
         link_or_path =  sys.argv[1] # take the link or path given by the user
         print(f"Source for crate: {link_or_path}")
-        CRATE_PATH = get_workflow(SUB_DIRECTORY_PATH, link_or_path )
-        print("Crate path is:",CRATE_PATH)
+        CRATE_PATH = get_workflow(SUB_DIRECTORY_PATH, link_or_path)
+        # print("Crate path is:",CRATE_PATH)
+        DATA_PERSISTENCE = get_data_persistence_status(CRATE_PATH)
+        print("Data persistence is:", DATA_PERSISTENCE)
         os.chdir(SUB_DIRECTORY_PATH) # Avoid problems when relative paths are used as parameter
+
         if not SLURM_CLUSTER:
             NEW_DATASET_FLAG = get_yes_or_no("Do you want to reproduce the crate on a new dataset?")
 
-        if not SLURM_CLUSTER or get_data_persistence_status(CRATE_PATH): #can generate provenance for dpt
+        if not SLURM_CLUSTER or DATA_PERSISTENCE: #can generate provenance for dpt
             PROVENANCE_FLAG = provenance_info_collector(SUB_DIRECTORY_PATH, SERVICE_PATH)
 
         rs = ReproducibilityService(PROVENANCE_FLAG, NEW_DATASET_FLAG)
@@ -178,7 +180,7 @@ if __name__ == "__main__":
         if RESULT:
             print_colored("Reproducibility Service has been executed successfully", TextColor.GREEN)
         else:
-            print_colored("Reproducibility Service has been failed", TextColor.RED)
+            print_colored("Reproducibility Service has failed", TextColor.RED)
 
         if PROVENANCE_FLAG and not SLURM_CLUSTER:
             provenance_checker(SUB_DIRECTORY_PATH)

@@ -249,7 +249,7 @@ def get_data_persistence_status(crate_path:str) -> bool:
             yaml_file_path = f"{crate_path}/{name}"
             break
     if not yaml_file_path:
-        raise FileNotFoundError("ro-crate-info.yaml file not found in the crate")
+        raise FileNotFoundError("YAML file not found in the crate")
     # Open and read the YAML file
     with open(yaml_file_path, 'r') as file:
         # Load the content of the YAML file

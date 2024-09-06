@@ -29,7 +29,7 @@ def files_verifier(crate_path: str, instrument: str, objects: dict, remote_datas
         against the actual files in the specified directory. Optionally, it can also verify
         modification dates, although this feature is currently commented out.
     """
-    print_colored("Verifying the files in the crate",TextColor.YELLOW)
+    print_colored("Verifying the files in the crate", TextColor.YELLOW)
     file_verifier = [] # tuple of (file_name, file_path, content_size, actual_size)
     verified = True
     size_verifier = True

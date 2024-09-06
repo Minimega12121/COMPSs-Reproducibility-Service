@@ -29,7 +29,7 @@ def generate_command_line(self, sub_directory_path:str) -> list[str]:
     Returns:
     list[str]: Modified command line arguments.
     """
-    print('\nParsing metadata...', self.crate_directory)
+    # print('\nParsing metadata from: ', self.crate_directory)
     path = self.crate_directory
     dataset_flags = (self.remote_dataset_flag, self.new_dataset_flag)
 
@@ -107,8 +107,8 @@ def command_line_generator(command: str, path: str, dataset_hashmap: dict,
     flags = []
     paths = []
     values = []
-    print(1)
-    print(path)
+    # print(1)
+    # print(path)
     files_a = get_file_names(os.path.join(path, "application_sources"))
     files_d = get_file_names(os.path.join(path, "dataset"))
     files_r  = get_file_names(os.path.join(path, "remote_dataset"))
@@ -140,13 +140,13 @@ def command_line_generator(command: str, path: str, dataset_hashmap: dict,
     new_paths = []
 
     for filepath in paths:
-        pathr = is_result(filepath[0],results_dict, sub_directory_path)
+        pathr = is_result(filepath[0], results_dict, sub_directory_path)
 
         if pathr: # if it is a result then it is specially mapped inside Result/ in the sub-dir
-            new_paths.append((pathr,filepath[1]))
+            new_paths.append((pathr, filepath[1]))
 
         else: # it is treated as a normal path inside application_sources or dataset
-            new_filepath = address_converter(path, filepath[0],dataset_hashmap,
+            new_filepath = address_converter(path, filepath[0], dataset_hashmap,
                                     application_sources_hashmap, remote_dataset_hashmap, dataset_flags)
             new_paths.append((new_filepath, filepath[1]))
 
