@@ -416,7 +416,7 @@ def check_compss_version()-> str:
         output = result.stdout.strip()
         if "COMPSs version" in output:
             version = output.split('COMPSs version ')[1].split(" ")[0]
-            print(f"COMPSs Version Found :{version}")
+            print(f"COMPSs Version Found: {version}")
             return version
         else:
             return "COMPSs version not found in the output."
@@ -497,7 +497,7 @@ def wrap_text(text, width):
     return '\n'.join([text[i:i+width] for i in range(0, len(text), width)])
 
 # Function to generate the table
-def generate_file_status_table(file_status_list,Third_field:str, path_width_limit=30):
+def generate_file_status_table(file_status_list,Third_field:str, path_width_limit=45):
     """
     To generate a table to display the file status.
     Args:
@@ -506,7 +506,7 @@ def generate_file_status_table(file_status_list,Third_field:str, path_width_limi
     """
     table = []
     # Adding header row
-    table.append(["S.No.", "Filename", "File Path", Third_field , "File Size Verified"])
+    table.append(["", "Metadata File Name", "Host File Path", Third_field , "Size"])
 
     # Adding file status rows
     for i, (filename, file_path, file_exists, file_size_verified) in enumerate(file_status_list, start=1):
@@ -514,8 +514,9 @@ def generate_file_status_table(file_status_list,Third_field:str, path_width_limi
 
         # Wrap the file path if it exceeds the specified width limit
         wrapped_file_path = wrap_text(file_path, path_width_limit)
+        wrapped_filename = wrap_text(filename, path_width_limit)
 
-        table.append([i, filename, wrapped_file_path, exists_symbol, size_verified_symbol])
+        table.append([i, wrapped_filename, wrapped_file_path, exists_symbol, size_verified_symbol])
 
     # Print the table
     print(tabulate(table, headers="firstrow", tablefmt="grid"))

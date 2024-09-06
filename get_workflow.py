@@ -37,9 +37,6 @@ def get_workflow(execution_path: str, link_or_path: str) -> str:
     if workflow_source == 'path':
         print_colored("Warning: Please ensure this is the path to a zip file or a directory", TextColor.RED)
         crate_path = os.path.abspath(link_or_path)
-        print("The path to the crate is:", crate_path)
-        print(f"isdir is: {os.path.isdir(crate_path)}")
-        print(f"cwd is: {os.getcwd()}")
 
         if zipfile.is_zipfile(crate_path):
             shutil.copy(crate_path, os.path.join(workflow_path, "my_crate.zip"))

@@ -83,7 +83,7 @@ class ReproducibilityService:
 
         # not using currently to run 3.3.1,3.3 examples on a 3.3 or 3.3.1 compss machine
         if COMPSS_VERSION != crate_compss_version:
-            print_colored(f"Warning| The crate was created with a different COMPSs version of: {get_compss_crate_version(self.crate_directory)}. The COMPSs version found locally: {COMPSS_VERSION}", TextColor.YELLOW)
+            print_colored(f"WARNING: The crate was created with COMPSs version: {get_compss_crate_version(self.crate_directory)}, which differs with the COMPSs version found locally: {COMPSS_VERSION}", TextColor.YELLOW)
 
         try:
             if not get_data_persistence_status(self.crate_directory):

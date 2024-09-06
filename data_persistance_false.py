@@ -109,7 +109,7 @@ def files_verifier_dpf(crate_path: str):
             # Verify the content size with the actual file size
             if actual_size != content_size:
                 file_tuple = (file_tuple[0], file_tuple[1], file_tuple[2], 0)
-                print(f"Size of {file_path} is incorrect")
+                # print(f"Size of {file_path} is incorrect")
                 size_verifier = False
                 temp_size.append(file_path)
             else:
@@ -118,7 +118,7 @@ def files_verifier_dpf(crate_path: str):
 
         actual_modified_date = dt.datetime.utcfromtimestamp(os.path.getmtime(file_path)).replace(microsecond=0).isoformat()
         if "dateModified" in file_object and actual_modified_date != file_object["dateModified"][:-6]:
-            print(f"DateModified of {file_path} is incorrect\n")
+            # print(f"DateModified of {file_path} is incorrect\n")
             date_verifier = False
             temp_date.append(file_path)
             file_tuple = (file_tuple[0], file_tuple[1], 0, file_tuple[3])
@@ -128,21 +128,18 @@ def files_verifier_dpf(crate_path: str):
 
     print_colored("STATUS TABLE:", TextColor.YELLOW)
 
-    generate_file_status_table(file_verifer, "Date_Modified")
+    generate_file_status_table(file_verifer, "Mod. Date")
     if date_verifier:
-        print_colored("All files have correct dateModified", TextColor.GREEN)
+        print_colored("All files have correct Modification Date", TextColor.GREEN)
+    else:
+        print_colored("WARNING: Modification Date mismatch in the application input files. Re-execution may not work or may lead to different results.", TextColor.RED)
 
     if size_verifier:
-        print_colored("All files have correct sizes.", TextColor.GREEN)
-
-    if not size_verifier:
-        if not date_verifier:
-            raise ValueError(f"Content size mismatch in files: {temp_size}")
-        else:
-            raise ValueError(f"Content size mismatch in files: {temp_size}\nDateModified mismatch in files: {temp_date}")
-
-    if not date_verifier:
-        raise ValueError(f"DateModified mismatch in files: {temp_date}")
+        print_colored("All files have correct Sizes", TextColor.GREEN)
+    else:
+        print_colored(
+            "WARNING: File Size mismatch in the application input files. Re-execution may not work or may lead to different results.",
+            TextColor.RED)
 
 def data_persistance_false_verifier(crate_path:str):
     """
@@ -154,11 +151,11 @@ def data_persistance_false_verifier(crate_path:str):
     Raises:
         ValueError: If some files are not accessible 
     """
-    if check_slurm_cluster()[0]:
-        print("Slurm cluster")
-    else:
-        print("Not a Slurm cluster")
-        raise ValueError ("The crate was created with data persistence set to false. Please run the crate on the cluster in which the dataset paths are available.")
+    # if check_slurm_cluster()[0]:
+    #     print("Slurm cluster")
+    # else:
+    #     print("Not a Slurm cluster")
+    #     raise ValueError ("The crate was created with data persistence set to false. Please run the crate on the cluster in which the dataset paths are available.")
 
     crate = ROCrate(crate_path)
 
@@ -172,7 +169,7 @@ def data_persistance_false_verifier(crate_path:str):
 
     else:
         print_colored("All files are accessible", TextColor.GREEN)
-        print("Checking file sizes...")
+        # print("Checking file sizes...")
         try:
             files_verifier_dpf(crate_path)
         except ValueError as e:
@@ -347,8 +344,8 @@ def address_mapper_dpf(addr:str, object_list: list, result_list: list, applicati
 
     if result_flag:
         global OUTPUT_NUM
-        os.makedirs(os.path.join(RESULT_PATH,f"new_output_{OUTPUT_NUM}"), exist_ok=True)
-        mapped_addr = os.path.join(RESULT_PATH,f"new_output_{OUTPUT_NUM}")
+        os.makedirs(os.path.join(RESULT_PATH,f"new_output_{OUTPUT_NUM}/"), exist_ok=True)
+        mapped_addr = os.path.join(RESULT_PATH,f"new_output_{OUTPUT_NUM}/")
         OUTPUT_NUM+=1
         return mapped_addr
     # If the address is a file, append the filename and check if exists
@@ -481,8 +478,10 @@ def command_line_generator_dpf(command: str,path:str) -> list[str]:
         new_command.append(values[p2][0])
         p2 += 1
 
-
-    new_command[0] = "enqueue_compss"
+    if check_slurm_cluster()[0]:
+        new_command[0] = "enqueue_compss"
+    else:
+        new_command[0] = "runcompss"
 
     return new_command
 

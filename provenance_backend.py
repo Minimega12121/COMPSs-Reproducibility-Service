@@ -75,7 +75,7 @@ def provenance_info_collector(execution_path:str, service_path: str) -> bool:
         to ensure it is filled correctly. If not found or verified, it invokes 'get_ro_crate_info'
         to generate the file. It returns True if provenance collection is enabled, False otherwise.
     """
-    provenance_flag = get_yes_or_no("Do you want to see the provenance of the workflow?")
+    provenance_flag = get_yes_or_no("Do you want to generate the provenance of your workflow run?")
     print("Provenance_flag:",provenance_flag)
     if provenance_flag:
         files = os.listdir(os.getcwd())

@@ -96,7 +96,7 @@ def files_verifier(crate_path: str, instrument: str, objects: dict, remote_datas
 
     print_colored("STATUS TABLE:", TextColor.YELLOW)
 
-    generate_file_status_table(file_verifier, "File Accessible")
+    generate_file_status_table(file_verifier, "Accessible")
 
     if not size_verifier:
         if verified:
