@@ -165,7 +165,7 @@ if __name__ == "__main__":
         if not SLURM_CLUSTER:
             NEW_DATASET_FLAG = get_yes_or_no("Do you want to reproduce the crate on a new dataset?")
 
-        if not SLURM_CLUSTER or get_data_persistence_status(os.path.join(SUB_DIRECTORY_PATH, "Workflow")): #can generate provenance for dpt
+        if not SLURM_CLUSTER or get_data_persistence_status(CRATE_PATH): #can generate provenance for dpt
             PROVENANCE_FLAG = provenance_info_collector(SUB_DIRECTORY_PATH, SERVICE_PATH)
 
         rs = ReproducibilityService(PROVENANCE_FLAG, NEW_DATASET_FLAG)
