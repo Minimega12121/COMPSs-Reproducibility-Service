@@ -94,9 +94,9 @@ def files_verifier(crate_path: str, instrument: str, objects: dict, remote_datas
 
         file_verifier.append(file_tuple)
 
-    print_colored("STATUS TABLE:", TextColor.YELLOW)
+    print_colored("STATUS TABLE (the crate includes the DATASETS needed by the workflow to run, data persistence was TRUE):", TextColor.YELLOW)
 
-    generate_file_status_table(file_verifier, "Accessible")
+    generate_file_status_table(file_verifier, "Included")
 
     if not size_verifier:
         if verified:

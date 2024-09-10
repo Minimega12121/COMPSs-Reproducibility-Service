@@ -126,7 +126,7 @@ def files_verifier_dpf(crate_path: str):
         #     print(f"DateModified of {file_path} is correct")
         file_verifer.append(file_tuple)
 
-    print_colored("STATUS TABLE:", TextColor.YELLOW)
+    print_colored("STATUS TABLE (the crate includes REFERENCES to the files the workflow needs to run, data persistence was FALSE):", TextColor.YELLOW)
 
     generate_file_status_table(file_verifer, "Mod. Date")
     if date_verifier:
