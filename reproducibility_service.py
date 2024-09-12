@@ -173,7 +173,7 @@ if __name__ == "__main__":
         rs = ReproducibilityService(PROVENANCE_FLAG, NEW_DATASET_FLAG)
         RESULT = False #default value
         if DPF:
-            print(rs.crate_directory)
+            # print(rs.crate_directory)
             RESULT = run_dpf(SUB_DIRECTORY_PATH, rs.crate_directory)
         else:
             RESULT = rs.run()

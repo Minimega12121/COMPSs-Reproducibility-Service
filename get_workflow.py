@@ -35,7 +35,7 @@ def get_workflow(execution_path: str, link_or_path: str) -> str:
         workflow_source = 'path'
 
     if workflow_source == 'path':
-        print_colored("Warning: Please ensure this is the path to a zip file or a directory", TextColor.RED)
+        print_colored("Warning: Please ensure this is the path to a zip file or a directory", TextColor.YELLOW)
         crate_path = os.path.abspath(link_or_path)
 
         if zipfile.is_zipfile(crate_path):
@@ -46,8 +46,8 @@ def get_workflow(execution_path: str, link_or_path: str) -> str:
             raise ValueError(f"The file at path {crate_path} is not a valid")
 
     elif workflow_source == 'link':
-        print_colored("Warning: Please try using the wget command to ensure the link works before submitting the link here.",TextColor.RED)
-        print_colored("Example) wget -O my_crate.zip https://example.com/my_crate.zip", TextColor.RED)
+        print_colored("Warning: Please try using the wget command to ensure the link works before submitting the link here.", TextColor.YELLOW)
+        print_colored("Example: wget -O my_crate.zip https://example.com/my_crate.zip", TextColor.YELLOW)
         crate_link = link_or_path
         print("The link to download the crate is:", crate_link)
         if not urllib.parse.urlparse(crate_link).scheme in ['http', 'https']:
