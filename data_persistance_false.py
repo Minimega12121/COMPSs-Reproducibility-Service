@@ -166,6 +166,7 @@ def data_persistance_false_verifier(crate_path:str):
         for p in access_map:
             if not access_map[p]:
                 print_colored(p, TextColor.RED)
+        raise ValueError
 
     else:
         print_colored("All files are accessible", TextColor.GREEN)

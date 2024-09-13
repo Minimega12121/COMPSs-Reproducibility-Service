@@ -497,7 +497,7 @@ def wrap_text(text, width):
     return '\n'.join([text[i:i+width] for i in range(0, len(text), width)])
 
 # Function to generate the table
-def generate_file_status_table(file_status_list,Third_field:str, path_width_limit=45):
+def generate_file_status_table(file_status_list,Third_field:str, path_width_limit=40):
     """
     To generate a table to display the file status.
     Args:
