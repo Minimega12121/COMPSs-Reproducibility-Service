@@ -36,11 +36,11 @@ DPF: bool = False
 CRATE_PATH: str = None
 DATA_PERSISTENCE: bool = False
 
-def interrupt_handler(): # signal handler for cleaning up in case of an interrupt
+def interrupt_handler(signum, frame): # signal handler for cleaning up in case of an interrupt
     """
     Signal handler for safely exiting in case of interrupt.
     """
-    print_colored("Reproducibility Service has been interrupted.", TextColor.RED)
+    print_colored(f"Reproducibility Service has been interrupted with signal {signum}.", TextColor.RED)
     print_colored("Exiting the program.", TextColor.RED)
     sys.exit(0)
 
@@ -161,7 +161,7 @@ if __name__ == "__main__":
         CRATE_PATH = get_workflow(SUB_DIRECTORY_PATH, link_or_path)
         # print("Crate path is:",CRATE_PATH)
         DATA_PERSISTENCE = get_data_persistence_status(CRATE_PATH)
-        print("Data persistence is:", DATA_PERSISTENCE)
+        print_colored(f"DATA PERSISTENCE IN THE CRATE WAS: {DATA_PERSISTENCE}", TextColor.YELLOW)
         os.chdir(SUB_DIRECTORY_PATH) # Avoid problems when relative paths are used as parameter
 
         if not SLURM_CLUSTER:

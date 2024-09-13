@@ -57,7 +57,7 @@ def generate_command_line(self, sub_directory_path:str) -> list[str]:
 def commonsuffix(path1:str,path2:str):
     paths = [path1, path2]
     # Reverse the strings in the list to use os.path.commonprefix on the reversed strings
-    reversed_paths = [os.path.dirname(path)[::-1] for path in paths]
+    reversed_paths = [os.path.dirname(path)[::-1] for path in paths]  # This removes the ending '/' from the directories
     # Find the common prefix of the reversed strings
     reversed_common_prefix = os.path.commonprefix(reversed_paths)
     # Reverse the common prefix back to get the common suffix
@@ -77,13 +77,15 @@ def is_result(filepath:str,results_dict:dict, sub_directory_path:str)->str:
         if os.path.basename(filepath) in results_dict: #if it is a result
             return os.path.join(result_path,os.path.basename(filepath))
     else: # if path is a directory
-        for _,id in results_dict.items():
-            if commonsuffix(filepath,id):
-                #print("Result is possible for ",filepath,id)
-                is_possible_result = commonsuffix(filepath,id)
-                if not os.path.exists(os.path.join(result_path,is_possible_result)):
-                    os.mkdir(os.path.join(result_path,is_possible_result))
-                return os.path.join(result_path,is_possible_result)
+        for _, id in results_dict.items():
+            is_possible_result = commonsuffix(filepath, id)
+            if is_possible_result:
+                # print("Result is possible for ", filepath, id)
+                # print(f"Commonsuffix: {is_possible_result}")
+                is_possible_result += '/'
+                if not os.path.exists(os.path.join(result_path, is_possible_result)):
+                    os.mkdir(os.path.join(result_path, is_possible_result))
+                return os.path.join(result_path, is_possible_result)
 
     return None # if it is not a result
 
