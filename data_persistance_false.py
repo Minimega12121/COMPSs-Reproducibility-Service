@@ -141,7 +141,7 @@ def files_verifier_dpf(crate_path: str):
             "WARNING: File Size mismatch in the application input files. Re-execution may not work or may lead to different results.",
             TextColor.RED)
 
-def data_persistance_false_verifier(crate_path:str):
+def data_persistence_false_verifier(crate_path:str):
     """
     Verify if the crate was created with data persistance set to false.
 
@@ -162,7 +162,7 @@ def data_persistance_false_verifier(crate_path:str):
     (accessible,access_map) = check_file_accessibility(crate)
 
     if not accessible:
-        print_colored("The following paths are not accessible:",TextColor.RED)
+        print_colored("The following paths are not accessible:", TextColor.RED)
         for p in access_map:
             if not access_map[p]:
                 print_colored(p, TextColor.RED)

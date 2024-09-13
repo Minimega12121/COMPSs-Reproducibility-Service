@@ -20,13 +20,13 @@ from utils import (
     check_compss_version,check_slurm_cluster,executor,
     get_compss_crate_version,get_data_persistence_status,get_instument,
     get_objects_dict,get_previous_flags,get_yes_or_no,print_colored,
-    print_welcome_message,TextColor,
+    print_welcome_message,TextColor,get_create_action_name
 )
 from new_dataset_backend import new_dataset_info_collector
 from provenance_backend import provenance_info_collector, update_yaml, provenance_checker
 from get_workflow import get_workflow, get_more_flags, get_change_values
 from remote_dataset import remote_dataset
-from data_persistance_false import data_persistance_false_verifier, run_dpf
+from data_persistance_false import data_persistence_false_verifier, run_dpf
 
 SUB_DIRECTORY_PATH:str = None
 SERVICE_PATH:str = None
@@ -87,9 +87,11 @@ class ReproducibilityService:
             print_colored(f"WARNING: The crate was created with COMPSs version: {get_compss_crate_version(self.crate_directory)}, which differs with the COMPSs version found locally: {COMPSS_VERSION}", TextColor.YELLOW)
 
         try:
+            crate = ROCrate(self.crate_directory)
+            print_colored(f"THE RUN WAS: {get_create_action_name(crate)}", TextColor.YELLOW)
             global DATA_PERSISTENCE
             if not DATA_PERSISTENCE:
-                data_persistance_false_verifier(self.crate_directory)
+                data_persistence_false_verifier(self.crate_directory)
                 global DPF
                 DPF = True
                 return
@@ -98,7 +100,6 @@ class ReproducibilityService:
                 new_dataset_info_collector(self.crate_directory)
             else: # verify the metadata only if the old dataset is used
                 # print("Reproducing the crate on the old dataset.")
-                crate = ROCrate(self.crate_directory)
                 instrument = get_instument(crate)
                 objects = get_objects_dict(crate)
                 # download the remote data-set if it exists and return true if it exists

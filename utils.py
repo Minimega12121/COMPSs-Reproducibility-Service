@@ -80,7 +80,7 @@ def get_by_id(entity:ROCrate, id:str):
             return entity
     return None
 
-def get_Create_Action(entity:ROCrate):
+def get_Create_Action(crate:ROCrate):
     """
     To get the CreateAction entity from the ROCrate.
     Args:
@@ -90,7 +90,7 @@ def get_Create_Action(entity:ROCrate):
         _type_: None if not found else the CreateAction entity.
     """
     # Loop through all entities in the RO-Crate
-    for entity in entity.get_entities():
+    for entity in crate.get_entities():
         if entity.type == "CreateAction":
             return entity
     return None
@@ -117,12 +117,12 @@ def get_objects(entity:ROCrate) -> list[str]:
         _type_: A list of object IDs.
     """
     createAction = get_Create_Action(entity)
-    objects= []
+    objects = []
     if "object" in createAction:
         # It is not necessary to have inputs/objects in Create Action
         temp = createAction["object"]
     else:
-        return None
+        return objects  # Empty
 
     for val in temp:
         if "hasPart" in val:
@@ -147,7 +147,7 @@ def get_results_dict(entity:ROCrate)->dict:
         # It is not necessary to have inputs/objects in Create Action
         temp = createAction["result"]
     else:
-        return None
+        return results  # Empty
 
     for result in temp:
         results[result["name"]] = result.id
@@ -169,7 +169,7 @@ def get_objects_dict(entity:ROCrate)->dict:
         # It is not necessary to have inputs/objects in Create Action
         temp = createAction["object"]
     else:
-        return None
+        return objects  # Empty
 
     for input in temp:
         if "hasPart" in input:
@@ -180,6 +180,19 @@ def get_objects_dict(entity:ROCrate)->dict:
             objects[(input["name"],input.id)] = input.id
             # else it is just a single object
     return objects
+
+def get_create_action_name(entity: ROCrate) -> str:
+    """
+    Gets the COMPSs execution details in CreateAction["name"].
+    Args:
+        entity (ROCrate): The ROCrate object.
+
+    Returns:
+        str: The CreateAction["name"].
+    """
+    createAction = get_Create_Action(entity)
+    return createAction["name"]
+
 
 def key_exists_with_first_element(d, first_element):
     return any(key[0] == first_element for key in d)
@@ -212,6 +225,7 @@ def get_compss_crate_version(crate_path: str) ->  str:
     compss_object = get_by_id(crate,"#compss")
     return compss_object["version"]
 
+
 def get_yes_or_no(msg :str) :
     """
     To get the user input as 'y' or 'n'.
@@ -233,7 +247,7 @@ def get_yes_or_no(msg :str) :
 
 def get_data_persistence_status(crate_path:str) -> bool:
     """
-    To get data_persistanace status from ro-crate-yaml file.
+    To get data_persistence status from ro-crate-yaml file.
     Args:
         crate_path (str): Path for the crate directory.
     Raises:
