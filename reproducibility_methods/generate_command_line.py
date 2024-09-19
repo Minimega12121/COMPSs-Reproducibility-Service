@@ -29,7 +29,7 @@ def generate_command_line(self, sub_directory_path:str) -> list[str]:
     Returns:
     list[str]: Modified command line arguments.
     """
-    print('\nParsing metadata...', self.crate_directory)
+    # print('\nParsing metadata from: ', self.crate_directory)
     path = self.crate_directory
     dataset_flags = (self.remote_dataset_flag, self.new_dataset_flag)
 
@@ -57,7 +57,7 @@ def generate_command_line(self, sub_directory_path:str) -> list[str]:
 def commonsuffix(path1:str,path2:str):
     paths = [path1, path2]
     # Reverse the strings in the list to use os.path.commonprefix on the reversed strings
-    reversed_paths = [os.path.dirname(path)[::-1] for path in paths]
+    reversed_paths = [os.path.dirname(path)[::-1] for path in paths]  # This removes the ending '/' from the directories
     # Find the common prefix of the reversed strings
     reversed_common_prefix = os.path.commonprefix(reversed_paths)
     # Reverse the common prefix back to get the common suffix
@@ -77,13 +77,15 @@ def is_result(filepath:str,results_dict:dict, sub_directory_path:str)->str:
         if os.path.basename(filepath) in results_dict: #if it is a result
             return os.path.join(result_path,os.path.basename(filepath))
     else: # if path is a directory
-        for _,id in results_dict.items():
-            if commonsuffix(filepath,id):
-                #print("Result is possible for ",filepath,id)
-                is_possible_result = commonsuffix(filepath,id)
-                if not os.path.exists(os.path.join(result_path,is_possible_result)):
-                    os.mkdir(os.path.join(result_path,is_possible_result))
-                return os.path.join(result_path,is_possible_result)
+        for _, id in results_dict.items():
+            is_possible_result = commonsuffix(filepath, id)
+            if is_possible_result:
+                # print("Result is possible for ", filepath, id)
+                # print(f"Commonsuffix: {is_possible_result}")
+                is_possible_result += '/'
+                if not os.path.exists(os.path.join(result_path, is_possible_result)):
+                    os.mkdir(os.path.join(result_path, is_possible_result))
+                return os.path.join(result_path, is_possible_result)
 
     return None # if it is not a result
 
@@ -107,8 +109,8 @@ def command_line_generator(command: str, path: str, dataset_hashmap: dict,
     flags = []
     paths = []
     values = []
-    print(1)
-    print(path)
+    # print(1)
+    # print(path)
     files_a = get_file_names(os.path.join(path, "application_sources"))
     files_d = get_file_names(os.path.join(path, "dataset"))
     files_r  = get_file_names(os.path.join(path, "remote_dataset"))
@@ -140,13 +142,13 @@ def command_line_generator(command: str, path: str, dataset_hashmap: dict,
     new_paths = []
 
     for filepath in paths:
-        pathr = is_result(filepath[0],results_dict, sub_directory_path)
+        pathr = is_result(filepath[0], results_dict, sub_directory_path)
 
         if pathr: # if it is a result then it is specially mapped inside Result/ in the sub-dir
-            new_paths.append((pathr,filepath[1]))
+            new_paths.append((pathr, filepath[1]))
 
         else: # it is treated as a normal path inside application_sources or dataset
-            new_filepath = address_converter(path, filepath[0],dataset_hashmap,
+            new_filepath = address_converter(path, filepath[0], dataset_hashmap,
                                     application_sources_hashmap, remote_dataset_hashmap, dataset_flags)
             new_paths.append((new_filepath, filepath[1]))
 

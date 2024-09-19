@@ -32,7 +32,7 @@ def move_results_created(initial_files, execution_path: str):
             os.makedirs(result_folder_path)
         # Move the new files to the Result folder
         for new_file in new_files:
-            if new_file.startswith("reproducibility_service_"): #cannot move the execution directory into iteself
+            if new_file.startswith("reproducibility_service_"): #cannot move the execution directory into itself
                 continue
             if new_file == "__pycache__": # Do not consider the cache files
                 continue

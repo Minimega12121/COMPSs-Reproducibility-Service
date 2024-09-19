@@ -80,7 +80,7 @@ def get_by_id(entity:ROCrate, id:str):
             return entity
     return None
 
-def get_Create_Action(entity:ROCrate):
+def get_Create_Action(crate:ROCrate):
     """
     To get the CreateAction entity from the ROCrate.
     Args:
@@ -90,7 +90,7 @@ def get_Create_Action(entity:ROCrate):
         _type_: None if not found else the CreateAction entity.
     """
     # Loop through all entities in the RO-Crate
-    for entity in entity.get_entities():
+    for entity in crate.get_entities():
         if entity.type == "CreateAction":
             return entity
     return None
@@ -117,12 +117,12 @@ def get_objects(entity:ROCrate) -> list[str]:
         _type_: A list of object IDs.
     """
     createAction = get_Create_Action(entity)
-    objects= []
+    objects = []
     if "object" in createAction:
         # It is not necessary to have inputs/objects in Create Action
         temp = createAction["object"]
     else:
-        return None
+        return objects  # Empty
 
     for val in temp:
         if "hasPart" in val:
@@ -147,7 +147,7 @@ def get_results_dict(entity:ROCrate)->dict:
         # It is not necessary to have inputs/objects in Create Action
         temp = createAction["result"]
     else:
-        return None
+        return results  # Empty
 
     for result in temp:
         results[result["name"]] = result.id
@@ -169,7 +169,7 @@ def get_objects_dict(entity:ROCrate)->dict:
         # It is not necessary to have inputs/objects in Create Action
         temp = createAction["object"]
     else:
-        return None
+        return objects  # Empty
 
     for input in temp:
         if "hasPart" in input:
@@ -180,6 +180,19 @@ def get_objects_dict(entity:ROCrate)->dict:
             objects[(input["name"],input.id)] = input.id
             # else it is just a single object
     return objects
+
+def get_create_action_name(entity: ROCrate) -> str:
+    """
+    Gets the COMPSs execution details in CreateAction["name"].
+    Args:
+        entity (ROCrate): The ROCrate object.
+
+    Returns:
+        str: The CreateAction["name"].
+    """
+    createAction = get_Create_Action(entity)
+    return createAction["name"]
+
 
 def key_exists_with_first_element(d, first_element):
     return any(key[0] == first_element for key in d)
@@ -212,6 +225,7 @@ def get_compss_crate_version(crate_path: str) ->  str:
     compss_object = get_by_id(crate,"#compss")
     return compss_object["version"]
 
+
 def get_yes_or_no(msg :str) :
     """
     To get the user input as 'y' or 'n'.
@@ -233,7 +247,7 @@ def get_yes_or_no(msg :str) :
 
 def get_data_persistence_status(crate_path:str) -> bool:
     """
-    To get data_persistanace status from ro-crate-yaml file.
+    To get data_persistence status from ro-crate-yaml file.
     Args:
         crate_path (str): Path for the crate directory.
     Raises:
@@ -249,7 +263,7 @@ def get_data_persistence_status(crate_path:str) -> bool:
             yaml_file_path = f"{crate_path}/{name}"
             break
     if not yaml_file_path:
-        raise FileNotFoundError("ro-crate-info.yaml file not found in the crate")
+        raise FileNotFoundError("YAML file not found in the crate")
     # Open and read the YAML file
     with open(yaml_file_path, 'r') as file:
         # Load the content of the YAML file
@@ -416,7 +430,7 @@ def check_compss_version()-> str:
         output = result.stdout.strip()
         if "COMPSs version" in output:
             version = output.split('COMPSs version ')[1].split(" ")[0]
-            print(f"COMPSs Version Found :{version}")
+            print(f"COMPSs Version Found: {version}")
             return version
         else:
             return "COMPSs version not found in the output."
@@ -497,7 +511,7 @@ def wrap_text(text, width):
     return '\n'.join([text[i:i+width] for i in range(0, len(text), width)])
 
 # Function to generate the table
-def generate_file_status_table(file_status_list,Third_field:str, path_width_limit=30):
+def generate_file_status_table(file_status_list,Third_field:str, path_width_limit=40):
     """
     To generate a table to display the file status.
     Args:
@@ -506,7 +520,7 @@ def generate_file_status_table(file_status_list,Third_field:str, path_width_limi
     """
     table = []
     # Adding header row
-    table.append(["S.No.", "Filename", "File Path", Third_field , "File Size Verified"])
+    table.append(["", "Metadata File Name", "Host File Path", Third_field , "Size"])
 
     # Adding file status rows
     for i, (filename, file_path, file_exists, file_size_verified) in enumerate(file_status_list, start=1):
@@ -514,8 +528,9 @@ def generate_file_status_table(file_status_list,Third_field:str, path_width_limi
 
         # Wrap the file path if it exceeds the specified width limit
         wrapped_file_path = wrap_text(file_path, path_width_limit)
+        wrapped_filename = wrap_text(filename, path_width_limit)
 
-        table.append([i, filename, wrapped_file_path, exists_symbol, size_verified_symbol])
+        table.append([i, wrapped_filename, wrapped_file_path, exists_symbol, size_verified_symbol])
 
     # Print the table
     print(tabulate(table, headers="firstrow", tablefmt="grid"))
